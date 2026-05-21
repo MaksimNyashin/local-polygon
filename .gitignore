@@ -1,0 +1,8 @@
+freemaker.txt
+solutions/err
+tests/*
+inner_files/builds/*
+inner_files/invokation/*
+!inner_files/invokation/invoke.sh
+inner_files/*_err
+inner_files/*.txt
