@@ -1,13 +1,13 @@
 #!/usr/bin/bash
 
 # solution options
-main=solutions/main
-lang=cpp
-first_test_num=2
-checker=std_ncmp
-tl=1000
+export main=solutions/main
+export lang=cpp
+export first_test_num=2
+export checker=std_ncmp
+export tl=1000
 
 # C++ build options
-cpp_options="-Wall -Wextra -Wpedantic -DMAKS -D_GLIBCXX_DEBUG"
-cpp_version="-std=c++2a"
-py_version="python3"
+export cpp_options="-Wall -Wextra -Wpedantic -DMAKS -D_GLIBCXX_DEBUG"
+export cpp_version="-std=c++2a"
+export py_version="python3"

@@ -18,6 +18,8 @@ tests_tests=${test_dir}/tests
 source "$outer_files/config.sh"
 source "$inner_files/utils.sh"
 
+echo -e ${YELLOW}\"make gen\" is becoming outdated. Try using \"make c_gen\"${NC}
+
 createFolder $tests_tests
 
 > $tests
@@ -110,7 +112,7 @@ do
         cp $out ${tests_tests}/$file_test_num.ans
         ((suc_num++))
     else
-        echo '    Validator check is failed'
+        echo '    Validator check is failed' >> $tests
     fi
     ((total_num++))
 

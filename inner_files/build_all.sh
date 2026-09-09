@@ -7,6 +7,8 @@ outer_files=${home_dir}/outer_files
 source "$outer_files/config.sh"
 source "$my_dir/utils.sh"
 
+echo -e ${RED}\"make build\" is outdated. There is no need of using it${NC}
+
 build_files=${my_dir}/../outer_files/cpp_build.txt
 err=${my_dir}/build_err
 

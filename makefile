@@ -20,3 +20,6 @@ help:
 
 clear_all:
 	@${inner_files}/init_folder.sh
+
+c_gen:
+	@${inner_files}/run_cpp.sh run_gen
