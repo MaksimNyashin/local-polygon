@@ -26,3 +26,6 @@ c_gen:
 
 c_invoke:
 	@${inner_files}/run_cpp.sh invoke
+
+c_run:
+	@(${inner_files}/run_cpp.sh run $(T))

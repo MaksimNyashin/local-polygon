@@ -9,31 +9,16 @@
 
 namespace fs = std::filesystem;
 
+// const std::string RED = "\033[0;31m";
+const std::string RED = "\033[0;91m";
+const std::string GREEN = "\033[0;32m";
+const std::string BLUE = "\033[0;34m";
+const std::string YELLOW = "\033[0;33m";
+const std::string NC = "\033[0m"; // No Color
+
+
+
 namespace NConfig {
-
-struct TConfigSolution {
-    std::string main;
-    std::string lang;
-    int first_test_num;
-    std::string checker;
-    int tl;
-    int ml;
-    bool is_interactive;
-};
-
-struct TConfigBuild {
-    std::string cpp_options;
-    std::string cpp_version;
-    std::string py_version;
-    int thread_num;
-};
-
-struct TConfig {
-    TConfigSolution solution;
-    TConfigBuild build;
-
-    int is_cont;
-};
 
 int read_int(const std::string& str) {
     char* res = std::getenv(str.c_str());
@@ -53,23 +38,51 @@ std::string read_string(const std::string& str) {
     }
 }
 
-TConfig read_config() {
-    TConfig result;
-    result.solution.main = read_string("main");
-    result.solution.lang = read_string("lang");
-    result.solution.first_test_num = read_int("first_test_num");
-    result.solution.checker = read_string("checker");
-    result.solution.tl = read_int("tl");
-    result.solution.ml = read_int("ml");
-    result.solution.is_interactive = read_int("is_interactive");
+struct TConfigSolution {
+    std::string main;
+    std::string lang;
+    int first_test_num;
+    std::string checker;
+    int tl;
+    int ml;
+    bool is_interactive;
 
-    result.build.cpp_options = read_string("cpp_options");
-    result.build.cpp_version = read_string("cpp_version");
-    result.build.py_version = read_string("py_version");
-    result.build.thread_num = read_int("thread_num");
+    TConfigSolution()
+        : main(read_string("main"))
+        , lang(read_string("lang"))
+        , first_test_num(read_int("first_test_num"))
+        , checker(read_string("checker"))
+        , tl(read_int("tl"))
+        , ml(read_int("ml"))
+        , is_interactive(read_int("is_interactive"))
+    {}
+};
 
-    result.is_cont = read_int("is_cont");
-    return result;
+struct TConfigBuild {
+    std::string cpp_options;
+    std::string cpp_version;
+    std::string py_version;
+    int thread_num;
+
+    TConfigBuild()
+        : cpp_options(read_string("cpp_options"))
+        , cpp_version(read_string("cpp_version"))
+        , py_version(read_string("py_version"))
+        , thread_num(read_int("thread_num"))
+    {}
+};
+
+struct TConfig {
+    TConfigSolution solution;
+    TConfigBuild build;
+
+    int is_cont;
+
+    TConfig()
+        : solution()
+        , build()
+        , is_cont(read_int("is_cont"))
+    {}
 };
 
 } // NConfig
@@ -79,6 +92,16 @@ using TConfig = NConfig::TConfig;
 
 
 namespace NPaths {
+
+void clear_file(const fs::path& path) {
+    if (!fs::exists(path)) {
+        return;
+    }
+    std::ofstream file(path, std::ios::trunc);
+    if (file.is_open()) {
+        file.close();
+    }
+}
 
 struct TPaths {
     fs::path my_dir;
@@ -105,49 +128,44 @@ struct TPaths {
 
     fs::path inv_err;
     fs::path inv_tmp;
+
+    fs::path sol_in;
+    fs::path sol_out;
+    fs::path sol_err;
+
+    TPaths()
+        : my_dir(fs::path(__FILE__).parent_path())
+        , home_dir(my_dir.parent_path().parent_path())
+        , checkers(home_dir / "checkers")
+        , inner_files(my_dir.parent_path())
+        , outer_files(home_dir / "outer_files")
+        , solutions(home_dir / "solutions")
+        , test_dir(home_dir / "tests")
+
+        , build_err(inner_files / "build_err.txt")
+        , builds(inner_files / "builds")
+        , gen_err(inner_files / "_err")
+        , gen_in(inner_files / "in.txt")
+        , gen_out(inner_files / "out.txt")
+        , inv(inner_files / "invokation")
+        , validator_logs(inner_files / "validator_logs.txt")
+
+        , gen_strings(outer_files / "gen_strings.txt")
+        , inv_solutions(outer_files / "invoke_solutions.txt")
+
+        , gen_tests(test_dir / "tests.txt")
+        , tests_tests(test_dir / "tests")
+
+        , inv_err(inv / "err")
+        , inv_tmp(inv / "tmp")
+
+        , sol_in(solutions / "in.txt")
+        , sol_out(solutions/ "out.txt")
+        , sol_err(solutions / "err.txt")
+    {
+        clear_file(build_err);
+    }
 };
-
-void clear_file(const fs::path& path) {
-    if (!fs::exists(path)) {
-        return;
-    }
-    std::ofstream file(path, std::ios::trunc);
-    if (file.is_open()) {
-        file.close();
-    }
-}
-
-struct TPaths get_paths() {
-    TPaths result;
-    result.my_dir = fs::path(__FILE__).parent_path();
-    result.home_dir = result.my_dir.parent_path().parent_path();
-    result.checkers = result.home_dir / "checkers";
-    result.inner_files = result.home_dir / "inner_files";
-    result.outer_files = result.home_dir / "outer_files";
-    result.solutions = result.home_dir / "solutions";
-    result.test_dir = result.home_dir / "tests";
-
-    result.build_err = result.inner_files / "build_err.txt";
-    result.builds = result.inner_files / "builds";
-    result.gen_err = result.inner_files / "_err";
-    result.gen_in = result.inner_files / "in.txt";
-    result.gen_out = result.inner_files / "out.txt";
-    result.inv = result.inner_files / "invokation";
-    result.validator_logs = result.inner_files / "validator_logs.txt";
-
-    result.gen_strings = result.outer_files / "gen_strings.txt";
-    result.inv_solutions = result.outer_files / "invoke_solutions.txt";
-
-    result.gen_tests = result.test_dir / "tests.txt";
-    result.tests_tests = result.test_dir / "tests";
-
-    result.inv_err = result.inv / "err";
-    result.inv_tmp = result.inv / "tmp";
-
-    clear_file(result.build_err);
-
-    return result;
-}
 
 } // NPaths
 
@@ -194,7 +212,7 @@ bool buildFiles(const TPaths& paths, const TConfig& config, const std::string& f
         if (needsUpdate(paths, file_path)) {
             createFolder(paths.builds);
             if (
-                !std::system(
+                std::system(
                     std::format(
                         "g++ {} {} -o {} {}.cpp 2>> {}",
                         config.build.cpp_version,
@@ -205,13 +223,13 @@ bool buildFiles(const TPaths& paths, const TConfig& config, const std::string& f
                     ).c_str()
                 )
             ) {
-                std::cout << file_path << " is built successfully" << std::endl;
-            } else {
-                std::cout << "CE" << std::endl;
+                std::cout << RED << file_path << ": CE" << NC << std::endl;
                 return false;
+            } else {
+                std::cout << BLUE << file_path << " is built successfully" << NC << std::endl;
             }
-        } else {
-            std::cout << "The " << file_path << " binary is already up-to-date" << std::endl;
+        // } else {
+            // std::cout << "The " << file_path << " binary is already up-to-date" << std::endl;
         }
     }
     return true;
@@ -235,12 +253,6 @@ std::string remove_trailing_spaces(const std::string& s) {
 
 
 
-// const std::string RED = "\033[0;31m";
-const std::string RED = "\033[0;91m";
-const std::string GREEN = "\033[0;32m";
-const std::string BLUE = "\033[0;34m";
-const std::string YELLOW = "\033[0;33m";
-const std::string NC = "\033[0m"; // No Color
 
 
 class TTimer {
@@ -272,4 +284,32 @@ void cat_file(const fs::path& path, std::ostream& os) {
         os << line << '\n';
     }
     tmp.close();
+}
+
+enum class EVerdict {
+    OK,
+    WA,
+    PE,
+    TL,
+    ML,
+    RE,
+    CE
+};
+
+EVerdict run_checker(const TPaths& paths, const std::string& test, const fs::path& checker, const fs::path& out_file) {
+    int checker_status = std::system(
+        std::format(
+            "{} --testset tests --group 0 \"{}.tst\" \"{}\" \"{}.ans\"",
+            checker.string(),
+            (paths.tests_tests / test).string(),
+            out_file.string(),
+            (paths.tests_tests / test).string()
+        ).c_str()
+    );
+    if (checker_status == 256) {
+        return EVerdict::WA;
+    } else if (checker_status == 512) {
+        return EVerdict::PE;
+    }
+    return EVerdict::OK;
 }

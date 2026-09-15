@@ -9,6 +9,8 @@ source "$my_dir/utils.sh"
 in=./solutions/in.txt
 err=./solutions/err
 
+echo -e ${YELLOW}\"make run\" is becoming outdated. Try using \"make c_run\"${NC}
+
 > $err
 
 if [ "${lang}" = "py" ]; then

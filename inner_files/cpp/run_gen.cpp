@@ -2,8 +2,8 @@
 #include <set>
 
 int main() {
-    TConfig config = NConfig::read_config();
-    TPaths paths = NPaths::get_paths();
+    TConfig config = NConfig::TConfig();
+    TPaths paths = NPaths::TPaths();
     NPaths::clear_file(paths.gen_err);
     NPaths::clear_file(paths.gen_tests);
 

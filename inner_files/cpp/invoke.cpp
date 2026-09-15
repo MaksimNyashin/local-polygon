@@ -58,16 +58,6 @@ struct TRunTest{
     int test_ind;
 };
 
-enum class EVerdict {
-    OK,
-    WA,
-    PE,
-    TL,
-    ML,
-    RE,
-    CE
-};
-
 const std::string verdicts[7] = {"OK", "WA", "PE", "TL", "ML", "RE", "CE"};
 
 using TTestResult = std::map<std::pair<int ,int>, std::pair<EVerdict, double>>;
@@ -143,20 +133,7 @@ void run_thread(
         } else if (status != 0) {
             verdict = EVerdict::RE;
         } else {  // Run Checker for OK, WA or PE
-            int checker_status = std::system(
-                std::format(
-                    "{} --testset tests --group 0 \"{}.tst\" \"{}\" \"{}.ans\"",
-                    checker.string(),
-                    (paths.tests_tests / test.test).string(),
-                    out_file.string(),
-                    (paths.tests_tests / test.test).string()
-                ).c_str()
-            );
-            if (checker_status == 256) {
-                verdict = EVerdict::WA;
-            } else if (checker_status == 512) {
-                verdict = EVerdict::PE;
-            }
+            verdict = run_checker(paths, test.test, checker, out_file);
         }
 
         // Save test result
@@ -169,8 +146,8 @@ void run_thread(
 
 
 int main() {
-    TConfig config = NConfig::read_config();
-    TPaths paths = NPaths::get_paths();
+    const TConfig config = NConfig::TConfig();
+    const TPaths paths = NPaths::TPaths();
 
     NBuild::createFolder(paths.inv_tmp);
 
