@@ -3,3 +3,5 @@ generator -t=1
 generator -t=2
 generator -t=3
 generator -t=4
+generator -t=5
+generator -t=6

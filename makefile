@@ -23,3 +23,6 @@ clear_all:
 
 c_gen:
 	@${inner_files}/run_cpp.sh run_gen
+
+c_invoke:
+	@${inner_files}/run_cpp.sh invoke

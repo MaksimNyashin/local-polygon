@@ -15,6 +15,8 @@ invokation_tmp=${my_dir}/tmp
 source "$outer_files/config.sh"
 source "$inner_files/utils.sh"
 
+echo -e ${YELLOW}\"make invoke\" is becoming outdated. Try using \"make c_invoke\"${NC}
+
 createFolder "$invokation_tmp"
 
 test_names=()

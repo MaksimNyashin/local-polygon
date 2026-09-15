@@ -4,18 +4,20 @@
 int main() {
     TConfig config = NConfig::read_config();
     TPaths paths = NPaths::get_paths();
+    NPaths::clear_file(paths.gen_err);
+    NPaths::clear_file(paths.gen_tests);
 
     // Compile Main Correct Solution
     fs::path built_main = NBuild::buildLine(paths, config.solution.main);
     if (!NBuild::buildFiles(paths, config, config.solution.main, config.solution.lang)) {
-        std::cout << RED << "failed to compile " << config.solution.main << ".cpp" << NC << std::endl;
+        std::cout << RED << "Failed to compile " << config.solution.main << ".cpp" << NC << std::endl;
         exit(1);
     }
 
     // Compile Validator
     fs::path built_validator = NBuild::buildLine(paths, "validator");
     if (!NBuild::buildFiles(paths, config, "validator", "cpp")) {
-        std::cout << RED << "failed to compile validator.cpp" << NC << std::endl;
+        std::cout << RED << "Failed to compile validator.cpp" << NC << std::endl;
         exit(1);
     }
 

@@ -8,4 +8,4 @@ inner_files/invokation/*
 inner_files/*_err
 inner_files/*.txt
 !inner_files/write_help.txt
-inner_files/cpp/tmp
+inner_files/cpp/bin
