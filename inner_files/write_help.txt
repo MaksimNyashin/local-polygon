@@ -1,21 +1,29 @@
 Brief help
 Make options:
-    make build:
+    make build: (deprecated)
         Builds C++ files
-        Deprecated (Now everything build automatically when needed)
-    make gen:
+    make c_gen: (β)
         Generates tests using ./solutions/$main.$lang as main correct solution
         Uses ./generator.cpp and ./validator.cpp to generate and validate tests
         With generator strings from ./outer_files/generator_strings.txt
-    make run:
+    make gen:
+        Deprecated version of "make c_gen"
+    make c_run: (β)
         Runs main solution ./solutions/$main.$lang
         With ./solutions/in.txt as input file
         Outputs time of the run
-    make invoke
+    make c_run T=${test}: (β)
+        Runs main solution ./solutions/$main.$lang
+        With ./tests/tests/${test}.tst as input file
+        Compares the result with ./tests/tests/${test}.ans using ./checkers/$checker.cpp
+    make run:
+        Deprecated version of "make c_run"
+    make c_invoke: (β)
         Invokes files from ./outer_files/invoke_solutions.txt
         Runs all generated tests
         Outputs everything using a nice table with colors
-        TODO: catch MLs
+    make invoke:
+        Deprecated version of "make c_invoke"
     make freemaker:
         Outputs lines for test generation inside https://polygon.codeforcex.com/
     make help:
@@ -38,28 +46,32 @@ outer_files:
             If needed ./checkers/checker.cpp can be modified (write checker.cpp to select custom checker)
         tl:
             Time Limit in milliseconds
-            Not very precise
-    cpp_build.txt:
-        Add paths here to c++ files to build them using "make build" (deprecated)
+        ml:
+            Memory Limit in megabytes
+            For now exceeding memory limit returns Runtime Error
+    cpp_build.txt: (deprecated)
+        Add paths here to c++ files to build them using "make build"
         Paths are counted from the folder that contains the makefile
         Not more than one file in each line
         Line starting with "# " are commented out
         Must end with an empty line
     gen_strings.txt
         Add generator strings here to generate tests
-        Not more than instruction in each line
+        Not more than one instruction in each line
         Line starting with "# " are commented out
         Must end with an empty line
         To set a group name write "--group=<group_name>" in a separate line before the first test of this group
-            It will generate group "$ind<group_name>", where $ind is the number of the group
-            This is done because polygon works not well with non-ordered group names and with dashes/underscores
+            It will generate group "<group_name>"
+            It is recommended to use group number as its name
     invoke_solutions.txt
-        Add solution-filename stored in the ./solutions folder run them in "make invoke"
+        Add solution-filename stored in the ./solutions folder run them in "make c_invoke"
         After the solution-filename list all possible non-OK verdicts separated by "/":
             CE - compilation error (if appears then invocation of the solution is failed)
             RE - runtime error
             TL - time limit exceeded
             WA - wrong answer
+            PE - presentation error
+            ML - memory limit (usually MLE becomes RE)
         Not more than 1 solution in each line
         Line starting with "# " are commented out
         Must end with an empty line

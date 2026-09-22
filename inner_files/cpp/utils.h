@@ -91,6 +91,16 @@ using TConfig = NConfig::TConfig;
 
 
 
+void cat_file(const fs::path& path, std::ostream& os) {
+    std::ifstream tmp(path);
+    std::string line;
+    while (std::getline(tmp, line)) {
+        os << line << '\n';
+    }
+    tmp.close();
+}
+
+
 namespace NPaths {
 
 void clear_file(const fs::path& path) {
@@ -126,7 +136,6 @@ struct TPaths {
     fs::path gen_tests;
     fs::path tests_tests;
 
-    fs::path inv_err;
     fs::path inv_tmp;
 
     fs::path sol_in;
@@ -156,7 +165,6 @@ struct TPaths {
         , gen_tests(test_dir / "tests.txt")
         , tests_tests(test_dir / "tests")
 
-        , inv_err(inv / "err")
         , inv_tmp(inv / "tmp")
 
         , sol_in(solutions / "in.txt")
@@ -223,16 +231,35 @@ bool buildFiles(const TPaths& paths, const TConfig& config, const std::string& f
                     ).c_str()
                 )
             ) {
-                std::cout << RED << file_path << ": CE" << NC << std::endl;
+                std::cout << RED << file_path << "." << lang << ": CE" << NC << std::endl;
                 return false;
             } else {
-                std::cout << BLUE << file_path << " is built successfully" << NC << std::endl;
+                std::cout << BLUE << file_path << "." << lang << " is built successfully" << NC << std::endl;
             }
         // } else {
             // std::cout << "The " << file_path << " binary is already up-to-date" << std::endl;
         }
     }
     return true;
+}
+
+inline void write_errors(const fs::path& err_file, const std::string& filename, const int first_line, bool ex) {
+    if (!fs::is_empty(err_file)) {
+        std::cout << std::string(first_line, '-') << filename << std::string(first_line, '-') << RED << '\n';
+        cat_file(err_file, std::cout);
+        std::cout << NC << std::string(31, '-') << std::endl;
+        if (ex) {
+            exit(1);
+        }
+    }
+}
+
+inline void write_build_errors(const TPaths& paths, bool ex = true) {
+    write_errors(paths.build_err, "build_err", 11, ex);
+}
+
+inline void write_gen_errors(const TPaths& paths, bool ex = true) {
+    write_errors(paths.gen_err, "gen_err", 12, ex);
 }
 
 } // NBuild
@@ -276,15 +303,6 @@ private:
     std::chrono::high_resolution_clock::time_point start;
 };
 
-
-void cat_file(const fs::path& path, std::ostream& os) {
-    std::ifstream tmp(path);
-    std::string line;
-    while (std::getline(tmp, line)) {
-        os << line << '\n';
-    }
-    tmp.close();
-}
 
 enum class EVerdict {
     OK,

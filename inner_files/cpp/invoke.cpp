@@ -173,10 +173,8 @@ int main() {
     fs::path built_checker = NBuild::buildLine(paths, checker);
     if (!NBuild::buildFiles(paths, config, checker, "cpp")) {
         std::cout << RED << "Failed to compile " << checker <<".cpp" << NC << std::endl;
-        exit(1);
+        NBuild::write_build_errors(paths);
     }
-
-    NPaths::clear_file(paths.inv_err);
 
     std::map<std::string, EVerdict> verdicts_map;
     for (int i = 0; i < 7; ++i) {
@@ -224,17 +222,19 @@ int main() {
             for (std::size_t test_ind = 3; test_ind < result.size(); ++test_ind) {
                 test_result[{sol_ind, test_ind}] = {EVerdict::CE, 0};
             }
-        }
-        for (std::size_t test_ind = 3; test_ind < result.size(); ++test_ind) {
-            tests_queue.emplace(
-                std::get<0>(solutions[sol_ind]),
-                std::get<1>(solutions[sol_ind]),
-                result[test_ind][0],
-                sol_ind,
-                test_ind
-            );
+        } else {
+            for (std::size_t test_ind = 3; test_ind < result.size(); ++test_ind) {
+                tests_queue.emplace(
+                    std::get<0>(solutions[sol_ind]),
+                    std::get<1>(solutions[sol_ind]),
+                    result[test_ind][0],
+                    sol_ind,
+                    test_ind
+                );
+            }
         }
     }
+    NBuild::write_build_errors(paths, false);
 
     // Create testing threads
     std::vector<std::thread> threads;

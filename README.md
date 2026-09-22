@@ -42,16 +42,18 @@ Alternatively, the file [init.sh](init.sh) can be used.
 ## Makefile targets
 
 - `make clear_all` — should be run once when initializing the folder for a new problem.
-- `make run` — used to run the main correct solution on a custom test (stored in `./solutions/in.txt`).
-- `make gen` — used to generate tests according to `./outer_files/gen_string.txt` using the main correct solution, validating with `validator.cpp` and checking with the checker specified in the config.
-- `make invoke` — used to run files specified in `./outer_files/invoke_solutions.txt` on all generated tests.
-- `make freemaker` — generates Freemaker rows from `./outer_files/gen_string.txt`.
-- `make help` — used to read [a more detailed explanation of this tool](inner_files/write_help.txt).
+- `make c_run` — run the main correct solution on a custom test (stored in `./solutions/in.txt`).
+- `make c_run T=<test>` — run the main correct solution on a generated test `<test>.tst` and compare it to `<test>.ans` using the checker from the config.
+- `make c_gen` — generate tests according to `./outer_files/gen_string.txt` using the main correct solution, validating with `validator.cpp` and checking with the checker specified in the config.
+- `make invoke` — run files specified in `./outer_files/invoke_solutions.txt` on all generated tests.
+- `make freemaker` — generate Freemaker rows from `./outer_files/gen_string.txt`.
+- `make help` — read [a more detailed explanation of this tool](inner_files/write_help.txt).
 
 <details>
 TODO
 
-- Add ML handling.
+- Fix ML handling.
 - Add support for interactive tasks.
-- Add build error printing
+- Add ability to upload to polygon.
+- Add creating of task archive for Contester.
 </details>

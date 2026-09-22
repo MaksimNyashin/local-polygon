@@ -11,14 +11,14 @@ int main() {
     fs::path built_main = NBuild::buildLine(paths, config.solution.main);
     if (!NBuild::buildFiles(paths, config, config.solution.main, config.solution.lang)) {
         std::cout << RED << "Failed to compile " << config.solution.main << ".cpp" << NC << std::endl;
-        exit(1);
+        NBuild::write_build_errors(paths);
     }
 
     // Compile Validator
     fs::path built_validator = NBuild::buildLine(paths, "validator");
     if (!NBuild::buildFiles(paths, config, "validator", "cpp")) {
         std::cout << RED << "Failed to compile validator.cpp" << NC << std::endl;
-        exit(1);
+        NBuild::write_build_errors(paths);
     }
 
     int test_num = config.solution.first_test_num;
@@ -153,6 +153,8 @@ int main() {
     }
 
     std::cout << "\n________Validator results________\nSuccessfully generated/validated  " << suc_num << "/" << total_num << "  tests\n\n";
+
+    NBuild::write_gen_errors(paths, false);
 
     return 0;
 }

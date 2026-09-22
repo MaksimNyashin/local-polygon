@@ -31,8 +31,8 @@ int main(int argc, char* argv[]) {
         timer.finish("Time", std::cout);
     } else if (config.solution.lang == "cpp") {
         if (!NBuild::buildFiles(paths, config, config.solution.main, "cpp")) {
-            std::cout << RED << "Failed to compile" << config.solution.main << ".cpp" << NC << std::endl;
-            exit(1);
+            std::cout << RED << "Failed to compile " << config.solution.main << ".cpp" << NC << std::endl;
+            NBuild::write_build_errors(paths);
         }
         fs::path built_solution = NBuild::buildLine(paths, config.solution.main);
         TTimer timer = TTimer();
@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
         fs::path built_checker = NBuild::buildLine(paths, checker);
         if (!NBuild::buildFiles(paths, config, checker, "cpp")) {
             std::cout << RED << "Failed to compile " << checker <<".cpp" << NC << std::endl;
-            exit(1);
+            NBuild::write_build_errors(paths);
         }
         run_checker(paths, argv[1], built_checker, paths.sol_out.string());
     }
