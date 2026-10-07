@@ -11,3 +11,4 @@ inner_files/*.txt
 inner_files/cpp/bin
 solutions/out.txt
 solutions/err.txt
+cont/*

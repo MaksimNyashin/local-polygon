@@ -26,6 +26,8 @@ Make options:
         Deprecated version of "make c_invoke"
     make freemaker:
         Outputs lines for test generation inside https://polygon.codeforcex.com/
+    make_c_cont:
+        Crates archive for Contester in ./cont
     make help:
         Outputs this help message
 

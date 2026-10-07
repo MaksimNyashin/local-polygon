@@ -31,6 +31,7 @@ rm -f ${inner_files}/_err
 rm -f ${inner_files}/build_err
 rm -f ${inner_files}/in.txt
 rm -f ${inner_files}/out.txt
+rm -f ${inner_files}/cpp/bin
 rm -f ${tests}/tests/*.tst
 rm -f ${tests}/tests/*.ans
 rm -f ${tests}/tests/.gitkeep
@@ -42,6 +43,7 @@ rm -f ${inner_files}/invokation/err
 rm -f ${inner_files}/invokation/tmp/*
 rm -rf ${home_dir}/.git
 rm -f ${home_dir}/.gitignore
+rm -rf ${home_dir}/cont
 
 
 > ${solutions}/in.txt

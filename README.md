@@ -47,6 +47,7 @@ Alternatively, the file [init.sh](init.sh) can be used.
 - `make c_gen` — generate tests according to `./outer_files/gen_string.txt` using the main correct solution, validating with `validator.cpp` and checking with the checker specified in the config.
 - `make invoke` — run files specified in `./outer_files/invoke_solutions.txt` on all generated tests.
 - `make freemaker` — generate Freemaker rows from `./outer_files/gen_string.txt`.
+- `make c_cont` — create archive for Contester.
 - `make help` — read [a more detailed explanation of this tool](inner_files/write_help.txt).
 
 <details>
@@ -55,5 +56,4 @@ TODO
 - Fix ML handling.
 - Add support for interactive tasks.
 - Add ability to upload to polygon.
-- Add creating of task archive for Contester.
 </details>

@@ -75,8 +75,8 @@ void run_thread(
     TRunTest test;
     fs::path out_file = paths.inv_tmp / (std::to_string(ind) + ".out");
     fs::path err_file = paths.inv_tmp / (std::to_string(ind) + ".err");
-    double upd_tl = double(config.solution.tl + 1000) / 1000;
-    double real_tl = double(config.solution.tl + 1000) / 1000;
+    double upd_tl = double(config.task.tl + 1000) / 1000;
+    double real_tl = double(config.task.tl + 1000) / 1000;
 
     NPaths::clear_file(err_file);
 
@@ -98,7 +98,7 @@ void run_thread(
             status = std::system(
                 std::format(
                     "ulimit -v {}; timeout {}s {} < {} 1> {} 2>>{}",
-                    config.solution.ml * 1024,
+                    config.task.ml * 1024,
                     upd_tl,
                     NBuild::buildLine(paths, "solutions/" + test.filename).string(),
                     (paths.tests_tests / (test.test + ".tst")).string(),
@@ -110,7 +110,7 @@ void run_thread(
             status = std::system(
                 std::format(
                     "ulimit -v {}; timeout {}s {} {}.py < {} 1> {} 2>>{}",
-                    config.solution.ml * 1024,
+                    config.task.ml * 1024,
                     upd_tl,
                     config.build.py_version,
                     (paths.solutions / test.filename).string(),
@@ -169,7 +169,7 @@ int main() {
     }
 
     // Compile Checker
-    std::string checker = "checkers/" + config.solution.checker;
+    std::string checker = "checkers/" + config.task.checker;
     fs::path built_checker = NBuild::buildLine(paths, checker);
     if (!NBuild::buildFiles(paths, config, checker, "cpp")) {
         std::cout << RED << "Failed to compile " << checker <<".cpp" << NC << std::endl;
@@ -297,11 +297,11 @@ int main() {
             result_arr.push_back(RED + "Fail" + NC);
         }
         std::string tl_col = GREEN;
-        if (max_tl * 500 > (double)config.solution.tl) {
+        if (max_tl * 500 > (double)config.task.tl) {
             tl_col = RED;
-        } else if (max_tl * 1000 > (double)config.solution.tl) {
+        } else if (max_tl * 1000 > (double)config.task.tl) {
             tl_col = YELLOW;
-        } else if (max_tl * 2000 > (double)config.solution.tl) {
+        } else if (max_tl * 2000 > (double)config.task.tl) {
             tl_col = BLUE;
         }
         time_spent_arr.push_back(std::format("{}{:.3f}{}", tl_col, max_tl, NC));

@@ -41,17 +41,25 @@ std::string read_string(const std::string& str) {
 struct TConfigSolution {
     std::string main;
     std::string lang;
-    int first_test_num;
-    std::string checker;
-    int tl;
-    int ml;
-    bool is_interactive;
 
     TConfigSolution()
         : main(read_string("main"))
         , lang(read_string("lang"))
-        , first_test_num(read_int("first_test_num"))
+    {}
+};
+
+struct TConfigTask {
+    std::string task_name;
+    std::string checker;
+    int tl;
+    int ml;
+    int first_test_num;
+    bool is_interactive;
+
+    TConfigTask()
+        : task_name(read_string("task_name"))
         , checker(read_string("checker"))
+        , first_test_num(read_int("first_test_num"))
         , tl(read_int("tl"))
         , ml(read_int("ml"))
         , is_interactive(read_int("is_interactive"))
@@ -74,14 +82,18 @@ struct TConfigBuild {
 
 struct TConfig {
     TConfigSolution solution;
+    TConfigTask task;
     TConfigBuild build;
 
-    int is_cont;
+    std::string contest;
+    std::string contest_let;
 
     TConfig()
         : solution()
+        , task()
         , build()
-        , is_cont(read_int("is_cont"))
+        , contest(read_string("contest"))
+        , contest_let(read_string("contest_let"))
     {}
 };
 
@@ -121,6 +133,8 @@ struct TPaths {
     fs::path outer_files;
     fs::path solutions;
     fs::path test_dir;
+    fs::path cont_dir;
+    fs::path checkers_cont;
 
     fs::path build_err;
     fs::path builds;
@@ -142,6 +156,8 @@ struct TPaths {
     fs::path sol_out;
     fs::path sol_err;
 
+    fs::path cont_tests;
+
     TPaths()
         : my_dir(fs::path(__FILE__).parent_path())
         , home_dir(my_dir.parent_path().parent_path())
@@ -150,6 +166,8 @@ struct TPaths {
         , outer_files(home_dir / "outer_files")
         , solutions(home_dir / "solutions")
         , test_dir(home_dir / "tests")
+        , cont_dir(home_dir / "cont" / "to_arch")
+        , checkers_cont(checkers / "cont" / "contlib.h")
 
         , build_err(inner_files / "build_err.txt")
         , builds(inner_files / "builds")
@@ -170,6 +188,8 @@ struct TPaths {
         , sol_in(solutions / "in.txt")
         , sol_out(solutions/ "out.txt")
         , sol_err(solutions / "err.txt")
+
+        , cont_tests(cont_dir / "tests")
     {
         clear_file(build_err);
     }

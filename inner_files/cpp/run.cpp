@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (argc > 1) {
-        std::string checker = "checkers/" + config.solution.checker;
+        std::string checker = "checkers/" + config.task.checker;
         fs::path built_checker = NBuild::buildLine(paths, checker);
         if (!NBuild::buildFiles(paths, config, checker, "cpp")) {
             std::cout << RED << "Failed to compile " << checker <<".cpp" << NC << std::endl;

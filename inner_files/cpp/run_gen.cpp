@@ -21,7 +21,7 @@ int main() {
         NBuild::write_build_errors(paths);
     }
 
-    int test_num = config.solution.first_test_num;
+    int test_num = config.task.first_test_num;
     int total_num = 0;
     int group_id = 0;
     int suc_num = 0;

@@ -13,7 +13,7 @@ src_file=${cpp_sources}/$1.cpp
 utils_file=${cpp_sources}/utils.h
 o_file=${cpp_sources}/bin/$1
 
-if [[ $(stat -c %y $o_file) < $(stat -c %y $src_file) || $(stat -c %y $o_file) < $(stat -c %y $utils_file) ]]; then
+if [[ ! -f "$o_file" || "$o_file" -ot "$src_file" || "$o_file" -ot "$utils_file" ]]; then
     g++ -std=c++2a $src_file -o $o_file && $o_file $2
 else
     $o_file $2
