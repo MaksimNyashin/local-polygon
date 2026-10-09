@@ -29,3 +29,9 @@ c_invoke:
 
 c_run:
 	@(${inner_files}/run_cpp.sh run $(T))
+
+c_cont:
+	@${inner_files}/run_cpp.sh cont_builder
+
+c_test_val:
+	@${inner_files}/run_cpp.sh validator_check

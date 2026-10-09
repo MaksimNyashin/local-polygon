@@ -11,7 +11,7 @@ def main():
             text = fi.read()
         with open(path.join(arch_dir, arg), "w", encoding="cp1251") as fo:
             fo.write(text)
-    make_archive(path.join(cont_dir, "tmp"), "zip", root_dir=arch_dir)
+    make_archive(path.join(cont_dir, "arch"), "zip", root_dir=arch_dir)
 
 if __name__ == "__main__":
     main()

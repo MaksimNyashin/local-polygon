@@ -26,15 +26,14 @@ done
 
 rm -rf ${default_files}
 rm -f ${inner_files}/builds/*
-rm -f ${inner_files}/builds/.gitkeep
-rm -f ${inner_files}/_err
-rm -f ${inner_files}/build_err
+rm -rf ${inner_files}/err
 rm -f ${inner_files}/in.txt
 rm -f ${inner_files}/out.txt
-rm -f ${inner_files}/cpp/bin
+rm -f ${inner_files}/cpp/bin/*
 rm -f ${tests}/tests/*.tst
 rm -f ${tests}/tests/*.ans
-rm -f ${tests}/tests/.gitkeep
+rm -r ${tests}/validator/.gitkeep
+rm -rf ${tests}/validator/*
 rm -f ${tests}/*.txt
 rm -f ${inner_files}/validator_logs.txt
 rm -f ${home_dir}/freemaker.txt

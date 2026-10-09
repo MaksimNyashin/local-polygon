@@ -17,6 +17,9 @@ const std::string YELLOW = "\033[0;33m";
 const std::string NC = "\033[0m"; // No Color
 
 
+namespace NBuild {
+inline void createFolder(const fs::path& path);
+}  // NBuild
 
 namespace NConfig {
 
@@ -135,7 +138,9 @@ struct TPaths {
     fs::path test_dir;
     fs::path cont_dir;
     fs::path checkers_cont;
+    fs::path tests_validator_dir;
 
+    fs::path err_dir;
     fs::path build_err;
     fs::path builds;
     fs::path gen_err;
@@ -157,21 +162,24 @@ struct TPaths {
     fs::path sol_err;
 
     fs::path cont_tests;
+    fs::path check_val_err;
 
     TPaths()
         : my_dir(fs::path(__FILE__).parent_path())
-        , home_dir(my_dir.parent_path().parent_path())
+        , home_dir(my_dir.parent_path().parent_path().parent_path())
         , checkers(home_dir / "checkers")
-        , inner_files(my_dir.parent_path())
+        , inner_files(home_dir / "inner_files")
         , outer_files(home_dir / "outer_files")
         , solutions(home_dir / "solutions")
         , test_dir(home_dir / "tests")
         , cont_dir(home_dir / "cont" / "to_arch")
         , checkers_cont(checkers / "cont" / "contlib.h")
+        , tests_validator_dir(test_dir / "validator")
 
-        , build_err(inner_files / "build_err.txt")
+        , err_dir(inner_files / "err")
+        , build_err(err_dir / "build_err.txt")
         , builds(inner_files / "builds")
-        , gen_err(inner_files / "_err")
+        , gen_err(err_dir / "_err")
         , gen_in(inner_files / "in.txt")
         , gen_out(inner_files / "out.txt")
         , inv(inner_files / "invokation")
@@ -190,7 +198,11 @@ struct TPaths {
         , sol_err(solutions / "err.txt")
 
         , cont_tests(cont_dir / "tests")
+
+        , check_val_err(err_dir / "validator_check.txt")
     {
+        NBuild::createFolder(tests_tests);
+        NBuild::createFolder(err_dir);
         clear_file(build_err);
     }
 };
@@ -263,11 +275,13 @@ bool buildFiles(const TPaths& paths, const TConfig& config, const std::string& f
     return true;
 }
 
-inline void write_errors(const fs::path& err_file, const std::string& filename, const int first_line, bool ex) {
+const size_t ERROR_DASH = 31;
+
+inline void write_errors(const fs::path& err_file, const std::string& filename, const size_t first_line, bool ex) {
     if (!fs::is_empty(err_file)) {
-        std::cout << std::string(first_line, '-') << filename << std::string(first_line, '-') << RED << '\n';
+        std::cout << std::string(first_line, '-') << filename << std::string(ERROR_DASH - first_line - filename.size(), '-') << RED << '\n';
         cat_file(err_file, std::cout);
-        std::cout << NC << std::string(31, '-') << std::endl;
+        std::cout << NC << std::string(ERROR_DASH, '-') << std::endl;
         if (ex) {
             exit(1);
         }
@@ -280,6 +294,10 @@ inline void write_build_errors(const TPaths& paths, bool ex = true) {
 
 inline void write_gen_errors(const TPaths& paths, bool ex = true) {
     write_errors(paths.gen_err, "gen_err", 12, ex);
+}
+
+inline void write_errors(const fs::path& path, const std::string& caption, bool ex = true) {
+    write_errors(path, caption, (ERROR_DASH + 1 - caption.size()) / 2, ex);
 }
 
 } // NBuild

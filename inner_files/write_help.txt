@@ -28,6 +28,15 @@ Make options:
         Outputs lines for test generation inside https://polygon.codeforcex.com/
     make_c_cont:
         Crates archive for Contester in ./cont
+    make c_test_val:
+        Runs all validator tests, checks verdict and outputs everything to console
+        Test example:
+            OK/1
+            3
+            1 2 3
+        OK - expected verdict
+        1 (after /) - test group name (optional)
+        The rest - the test
     make help:
         Outputs this help message
 

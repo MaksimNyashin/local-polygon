@@ -3,12 +3,13 @@ freemaker.txt
 solutions/err
 tests/*
 inner_files/builds
+inner_files/err
 inner_files/invokation/*
 !inner_files/invokation/invoke.sh
-inner_files/*_err
 inner_files/*.txt
 !inner_files/write_help.txt
 inner_files/cpp/bin
 solutions/out.txt
 solutions/err.txt
 cont/*
+!tests/validator
