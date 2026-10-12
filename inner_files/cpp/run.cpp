@@ -7,11 +7,11 @@ int main(int argc, char* argv[]) {
 
     std::string in_file;
     if (argc == 1) {  // run on custom test
-        in_file = paths.sol_in.string();
+        in_file = "\"" + paths.sol_in.string() + "\"";
     } else {
         std::string test = argv[1];
         in_file = std::format(
-            "{}.tst 1> {}",
+            "\"{}.tst\" 1> \"{}\"",
             (paths.tests_tests / test).string(),
             paths.sol_out.string()
         );
@@ -21,7 +21,7 @@ int main(int argc, char* argv[]) {
         TTimer timer = TTimer();
         std::system(
             std::format(
-                "{} ./{}.py < {} 2>> {}",
+                "{} \"./{}.py\" < {} 2>> \"{}\"",
                 config.build.py_version,
                 config.solution.main,
                 in_file,
@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
         TTimer timer = TTimer();
         std::system(
             std::format(
-                "{} < {} 2>> {}",
+                "\"{}\" < {} 2>> \"{}\"",
                 built_solution.string(),
                 in_file,
                 paths.sol_err.string()

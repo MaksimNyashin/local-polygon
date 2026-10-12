@@ -71,5 +71,5 @@ TODO
 - Add ability to upload to polygon.
 - Add checker tests
 - Add ability to launch using cmd
-- Add extra quotes for spaces in filenames
+- Add bounds hit checking
 </details>

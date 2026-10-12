@@ -75,6 +75,7 @@ void run_thread(
     TRunTest test;
     fs::path out_file = paths.inv_tmp / (std::to_string(ind) + ".out");
     fs::path err_file = paths.inv_tmp / (std::to_string(ind) + ".err");
+    fs::path msg_file = paths.inv_tmp / (std::to_string(ind) + ".msg");
     double upd_tl = double(config.task.tl + 1000) / 1000;
     double real_tl = double(config.task.tl + 1000) / 1000;
 
@@ -97,7 +98,7 @@ void run_thread(
         if (test.ext == "cpp") {
             status = std::system(
                 std::format(
-                    "ulimit -v {}; timeout {}s {} < {} 1> {} 2>>{}",
+                    "ulimit -v {}; timeout {}s \"{}\" < \"{}\" 1> \"{}\" 2>> \"{}\"",
                     config.task.ml * 1024,
                     upd_tl,
                     NBuild::buildLine(paths, "solutions/" + test.filename).string(),
@@ -109,7 +110,7 @@ void run_thread(
         } else if (test.ext == "py") {
             status = std::system(
                 std::format(
-                    "ulimit -v {}; timeout {}s {} {}.py < {} 1> {} 2>>{}",
+                    "ulimit -v {}; timeout {}s {} \"{}.py\" < \"{}\" 1> \"{}\" 2>> \"{}\"",
                     config.task.ml * 1024,
                     upd_tl,
                     config.build.py_version,
@@ -133,7 +134,32 @@ void run_thread(
         } else if (status != 0) {
             verdict = EVerdict::RE;
         } else {  // Run Checker for OK, WA or PE
-            verdict = run_checker(paths, test.test, checker, out_file);
+            verdict = run_checker(paths, test.test, checker, out_file, msg_file);
+            std::stringstream ss;
+            ss << test.filename << "." << test.ext << "::" << test.test << ":\t";
+            std::ifstream fi(msg_file);
+            std::stringstream ss2;
+            ss2 << fi.rdbuf();
+            fi.close();
+            std::string tmp;
+            if (verdict == EVerdict::OK) {
+                ss2 >> tmp;
+                ss << GREEN << tmp;
+            } else {
+                ss2 >> tmp;
+                ss << RED << tmp;
+                ss2 >> tmp;
+                ss << ' ' << tmp;
+                if (tmp[0] == 'o') {
+                    ss2 >> tmp;
+                    ss << ' ' << tmp;
+                }
+            }
+            std::getline(ss2, tmp, '\0');
+            ss << NC << ' ' << tmp;
+            tmp = ss.str();
+            tmp.pop_back();
+            std::cout << tmp << std::endl;
         }
 
         // Save test result

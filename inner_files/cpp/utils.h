@@ -119,9 +119,6 @@ void cat_file(const fs::path& path, std::ostream& os) {
 namespace NPaths {
 
 void clear_file(const fs::path& path) {
-    if (!fs::exists(path)) {
-        return;
-    }
     std::ofstream file(path, std::ios::trunc);
     if (file.is_open()) {
         file.close();
@@ -254,7 +251,7 @@ bool buildFiles(const TPaths& paths, const TConfig& config, const std::string& f
             if (
                 std::system(
                     std::format(
-                        "g++ {} {} -o {} {}.cpp 2>> {}",
+                        "g++ {} {} -o \"{}\" \"{}.cpp\" 2>> \"{}\"",
                         config.build.cpp_version,
                         config.build.cpp_options,
                         buildLine(paths, file_path).string(),
@@ -352,14 +349,19 @@ enum class EVerdict {
     CE
 };
 
-EVerdict run_checker(const TPaths& paths, const std::string& test, const fs::path& checker, const fs::path& out_file) {
+EVerdict run_checker(const TPaths& paths, const std::string& test, const fs::path& checker, const fs::path& out_file, const fs::path& result_msg = "") {
+    std::string msg = "";
+    if (result_msg != "") {
+        msg = "2> \"" + result_msg.string() + "\"";
+    }
     int checker_status = std::system(
         std::format(
-            "{} --testset tests --group 0 \"{}.tst\" \"{}\" \"{}.ans\"",
+            "\"{}\" --testset tests --group 0 \"{}.tst\" \"{}\" \"{}.ans\" {}",
             checker.string(),
             (paths.tests_tests / test).string(),
             out_file.string(),
-            (paths.tests_tests / test).string()
+            (paths.tests_tests / test).string(),
+            msg
         ).c_str()
     );
     if (checker_status == 256) {

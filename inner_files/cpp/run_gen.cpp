@@ -52,6 +52,7 @@ int main() {
 
         size_t space_pos = line.find(' ');
         std::string gen_name = (space_pos != std::string::npos) ? line.substr(0, space_pos) : line;
+        std::string gen_args = (space_pos != std::string::npos) ? line.substr(space_pos + 1) : "";
 
 
         // Compile generator if it wasn't already compiled
@@ -79,9 +80,10 @@ int main() {
         TTimer gen_timer = TTimer();
         std::system(
             std::format(
-                "{}/{} > {} 2>> {}",
+                "\"{}/{}\" {} > \"{}\" 2>> \"{}\"",
                 paths.builds.string(),
-                line,
+                gen_name,
+                gen_args,
                 paths.gen_in.string(),
                 paths.gen_err.string()
             ).c_str()
@@ -96,7 +98,7 @@ int main() {
         tests.close();
         int val_ret = std::system(
             std::format(
-                "{} --testset tests --group {} --testOverviewLogFileName {} --testCaseFileName {} < {} 2>> {}",
+                "\"{}\" --testset tests --group {} --testOverviewLogFileName \"{}\" --testCaseFileName \"{}\" < \"{}\" 2>> \"{}\"",
                 built_validator.string(),
                 group,
                 paths.validator_logs.string(),
@@ -115,7 +117,7 @@ int main() {
             if (config.solution.lang == "py") {
                 std::system(
                     std::format(
-                        "{} {} < {} > {} 2>> {}",
+                        "{} \"{}\" < \"{}\" > \"{}\" 2>> \"{}\"",
                         config.build.py_version,
                         (paths.home_dir / (config.solution.main + ".py")).string(),
                         paths.gen_in.string(),
@@ -126,7 +128,7 @@ int main() {
             } else {
                 std::system(
                     std::format(
-                        "{} < {} > {} 2>> {}",
+                        "\"{}\" < \"{}\" > \"{}\" 2>> \"{}\"",
                         built_main.string(),
                         paths.gen_in.string(),
                         paths.gen_out.string(),

@@ -62,7 +62,7 @@ int main() {
         // Run validator
         int val_ret = std::system(
             std::format(
-                "{} --testset tests --group \"{}\" <<EOF 2> {}\n{}EOF",
+                "\"{}\" --testset tests --group \"{}\" <<EOF 2> \"{}\"\n{}EOF",
                 built_validator.string(),
                 group,
                 paths.check_val_err.string(),
