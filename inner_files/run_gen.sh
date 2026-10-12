@@ -18,7 +18,8 @@ tests_tests=${test_dir}/tests
 source "$outer_files/config.sh"
 source "$inner_files/utils.sh"
 
-echo -e ${YELLOW}\"make gen\" is becoming outdated. Try using \"make c_gen\"${NC}
+echo -e ${YELLOW}\"make gen\" is outdated. Use \"make c_gen\"${NC}
+outdated
 
 createFolder $tests_tests
 

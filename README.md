@@ -70,4 +70,6 @@ TODO
 - Add support for interactive tasks.
 - Add ability to upload to polygon.
 - Add checker tests
+- Add ability to launch using cmd
+- Add extra quotes for spaces in filenames
 </details>

@@ -22,6 +22,9 @@ int main() {
     // Iterate over tests
     size_t good = 0, total = 0;
     for (const auto& test_filename : fs::directory_iterator(paths.tests_validator_dir)) {
+        if (test_filename.path().filename() == ".gitkeep") {
+            continue;
+        }
         // Get verdict
         const std::string filename = test_filename.path().filename().string();
         std::ifstream test(test_filename.path().string().c_str());

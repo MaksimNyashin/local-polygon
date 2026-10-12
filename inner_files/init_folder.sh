@@ -10,6 +10,11 @@ solutions=${home_dir}/solutions
 tests=${home_dir}/tests
 checkers=${home_dir}/checkers
 
+if [ ! -d $default_files ]; then
+    echo "The folder was cleared earlier"
+    exit 0
+fi
+
 rm -f ${solutions}/*
 
 for filename in ${default_files}/*

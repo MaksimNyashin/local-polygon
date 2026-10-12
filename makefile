@@ -34,4 +34,4 @@ c_cont:
 	@${inner_files}/run_cpp.sh cont_builder
 
 c_test_val:
-	@${inner_files}/run_cpp.sh validator_check
+	@${inner_files}/run_cpp.sh test_validator
