@@ -1,15 +1,17 @@
 #include "utils.h"
 #include <set>
 
-int main() {
+int main(int argc, char* argv[]) {
     TConfig config = NConfig::TConfig();
     TPaths paths = NPaths::TPaths();
     NPaths::clear_file(paths.gen_err);
     NPaths::clear_file(paths.gen_tests);
 
+    const int tst = (argc == 2 ? std::stoi(argv[1]) : -1);
+
     // Compile Main Correct Solution
     fs::path built_main = NBuild::buildLine(paths, config.solution.main);
-    if (!NBuild::buildFiles(paths, config, config.solution.main, config.solution.lang)) {
+    if (!NBuild::buildFiles(paths, config, config.solution.main, config.solution.lang, true)) {
         std::cout << RED << "Failed to compile " << config.solution.main << ".cpp" << NC << std::endl;
         NBuild::write_build_errors(paths);
     }
@@ -38,7 +40,7 @@ int main() {
         line = remove_trailing_spaces(line);
 
         // Remove empty lines and comments
-        if (line.size() == 0 || (line[0] == '#' && line[1] == '1')) {
+        if (line.size() == 0 || (line[0] == '#' && line[1] == ' ')) {
             continue;
         }
 
@@ -55,6 +57,12 @@ int main() {
         std::string gen_args = (space_pos != std::string::npos) ? line.substr(space_pos + 1) : "";
 
 
+        // Continue if only one test is generated
+        if (tst != -1 && test_num != tst) {
+            ++test_num;
+            continue;
+        }
+
         // Compile generator if it wasn't already compiled
         if (failed_generators.count(gen_name)) {
             std::cout << RED << gen_name << ".cpp didn't compile successfully" << NC << std::endl;
@@ -66,7 +74,7 @@ int main() {
             if (!NBuild::buildFiles(paths, config, gen_name, "cpp")) {
                 std::cout << RED << "Failed to compile " << gen_name << ".cpp" << NC << std::endl;
                 failed_generators.insert(gen_name);
-                ++test_num+
+                ++test_num;
                 ++total_num;
                 continue;
             } else {
@@ -154,7 +162,8 @@ int main() {
         tests.close();
     }
 
-    std::cout << "\n________Validator results________\nSuccessfully generated/validated  " << suc_num << "/" << total_num << "  tests\n\n";
+    std::cout << "\n________Validator results________\n";
+    std::cout << (suc_num < total_num ? RED : GREEN) << "Successfully generated/validated  " << suc_num << "/" << total_num << "  tests\n\n" << NC;
 
     NBuild::write_gen_errors(paths, false);
 

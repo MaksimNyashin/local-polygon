@@ -6,6 +6,8 @@ Make options:
         Generates tests using ./solutions/$main.$lang as main correct solution
         Uses ./generator.cpp and ./validator.cpp to generate and validate tests
         With generator strings from ./outer_files/generator_strings.txt
+    make c_gen T=${test}:
+        Generate only test number ${test}
     make gen:
         Deprecated version of "make c_gen"
     make c_run: (β)
@@ -37,6 +39,9 @@ Make options:
         OK - expected verdict
         1 (after /) - test group name (optional)
         The rest - the test
+    make c_test val T=1:
+        Writes all validator tests to console/ separated by ===.
+        Is used two add validator tests in Polygon
     make help:
         Outputs this help message
 
@@ -49,17 +54,36 @@ outer_files:
             The programming language of the main correct solution
             This value must be equal to the extension of the main solution
             Only two languages are supported: "py" and "cpp"
-        first_test_num:
-            The number of the first generated test
+        task_name:
+            The name of the task
+            Optional value, used only in Contester
         checker:
             The name of the checker from the ./checkers folder without the extension
             There are some standard checkers in the ./checker folder
-            If needed ./checkers/checker.cpp can be modified (write checker.cpp to select custom checker)
+            If needed ./checkers/checker.cpp can be modified (write checker to select custom checker)
         tl:
             Time Limit in milliseconds
         ml:
             Memory Limit in megabytes
             For now exceeding memory limit returns Runtime Error
+        first_test_num:
+            The number of the first generated test
+        cpp_options:
+            C++ build options that are used for generator, validator, checker and main solution in c_run mode
+        cpp_run_options:
+            C++ build options that are used for running solutions in c_gen and c_invoke
+        cpp_version:
+            C++ version the way it is written as g++ argument
+        py_version:
+            Python interpreter name, that is used to run python files
+        thread_num:
+            The number of threads that are used during invocation
+        contest:
+            The name of the contest
+            Optional value, used only in Contester
+        contest_let:
+            The letter of task in the contest
+            Optional value, used only in Contester
     cpp_build.txt: (deprecated)
         Add paths here to c++ files to build them using "make build"
         Paths are counted from the folder that contains the makefile

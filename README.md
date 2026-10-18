@@ -57,10 +57,12 @@ Copy the whole folder and run `make clear_all`.
 - `make c_run` — run the main correct solution on a custom test (stored in `./solutions/in.txt`).
 - `make c_run T=<test>` — run the main correct solution on a generated test `<test>.tst` and compare it to `<test>.ans` using the checker from the config.
 - `make c_gen` — generate tests according to `./outer_files/gen_string.txt` using the main correct solution, validating with `validator.cpp` and checking with the checker specified in the config.
+- `make c_gen T=<test>` — generate only test number `<test>`.
 - `make invoke` — run files specified in `./outer_files/invoke_solutions.txt` on all generated tests.
 - `make freemaker` — generate Freemaker rows from `./outer_files/gen_string.txt`.
 - `make c_cont` — create archive for Contester.
 - `make c_test_val` — run validator tests.
+- `make c_test_val T=1` — write all validator tests to console, separated by `===`.
 - `make help` — read [a more detailed explanation of this tool](inner_files/write_help.txt).
 
 <details>

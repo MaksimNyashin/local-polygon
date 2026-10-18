@@ -8,9 +8,11 @@ enum class EValidatorVerdict {
 
 const std::string verdict_to_str[2]{"OK", "Fail"};
 
-int main() {
+int main(int argc, char* argv[]) {
     const TConfig config = NConfig::TConfig();
     const TPaths paths = NPaths::TPaths();
+
+    bool write_all = (argc == 2);
 
     // Compile validator
     fs::path built_validator = NBuild::buildLine(paths, "validator");
@@ -19,6 +21,7 @@ int main() {
         NBuild::write_build_errors(paths);
     }
 
+    std::vector<EValidatorVerdict> verdicts;
     // Iterate over tests
     size_t good = 0, total = 0;
     for (const auto& test_filename : fs::directory_iterator(paths.tests_validator_dir)) {
@@ -58,37 +61,57 @@ int main() {
             text += tmp;
         }
         test.close();
+        assert(text.back() == '\n');
 
-        // Run validator
-        int val_ret = std::system(
-            std::format(
-                "\"{}\" --testset tests --group \"{}\" <<EOF 2> \"{}\"\n{}EOF",
-                built_validator.string(),
-                group,
-                paths.check_val_err.string(),
-                text
-            ).c_str()
-        );
-        EValidatorVerdict result;
-        if (val_ret == 0) {
-            result = EValidatorVerdict::OK;
-        } else if (val_ret == 768) {
-            result = EValidatorVerdict::FL;
-        }
-
-        // Output result
-        std::cerr << filename << ":\t";
-        if (result == expected) {
-            std::cerr << GREEN;
-            ++good;
+        if (write_all) {
+            verdicts.push_back(expected);
+            std::cout << text << "===\n";
         } else {
-            std::cerr << RED;
+            // Run validator
+            int val_ret = std::system(
+                std::format(
+                    "\"{}\" --testset tests --group \"{}\" <<EOF 2> \"{}\"\n{}EOF",
+                    built_validator.string(),
+                    group,
+                    paths.check_val_err.string(),
+                    text
+                ).c_str()
+            );
+            EValidatorVerdict result;
+            if (val_ret == 0) {
+                result = EValidatorVerdict::OK;
+            } else if (val_ret == 768) {
+                result = EValidatorVerdict::FL;
+            } else {
+                std::cerr << RED << "Error: " << NC << " validator_return = " << val_ret << std::endl;
+                NBuild::write_errors(paths.check_val_err, filename, false);
+                exit(val_ret);
+            }
+
+            // Output result
+            std::cerr << filename << ":\t";
+            if (result == expected) {
+                std::cerr << GREEN;
+                ++good;
+            } else {
+                std::cerr << RED;
+            }
+            ++total;
+            std::cerr << verdict_to_str[(int)result] << NC << '\n';
+            NBuild::write_errors(paths.check_val_err, filename, false);
+            std::cerr << '\n';
         }
-        ++total;
-        std::cerr << verdict_to_str[(int)result] << NC << '\n';
-        NBuild::write_errors(paths.check_val_err, filename, false);
-        std::cerr << '\n';
     }
-    std::cerr << (good == total ? GREEN : RED) << "Tests passed: " << good << "/" << total << NC << std::endl;
+    if (!write_all) {
+        std::cerr << (good == total ? GREEN : RED) << "Tests passed: " << good << "/" << total << NC << std::endl;
+    } else {
+        for (auto v : verdicts) {
+            if (v == EValidatorVerdict::OK) {
+                std::cout << "VALID\n";
+            } else {
+                std::cout << "INVALID\n";
+            }
+        }
+    }
     return 0;
 }

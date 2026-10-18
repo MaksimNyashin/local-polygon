@@ -15,9 +15,9 @@ if [ ! -d "$default_files" ]; then
     exit 0
 fi
 
-rm -f "${solutions}/*"
+rm -f "${solutions}/"*
 
-for filename in "${default_files}/*"
+for filename in "${default_files}/"*
 do
     filename_name="${filename##*/}"
     if [ "${filename_name:0:4}" = "main" ]; then
@@ -30,21 +30,21 @@ do
 done
 
 rm -rf "${default_files}"
-rm -f "${inner_files}/builds/*"
+rm -f "${inner_files}/builds/"*
 rm -rf "${inner_files}/err"
 rm -f "${inner_files}/in.txt"
 rm -f "${inner_files}/out.txt"
-rm -f "${inner_files}/cpp/bin/*"
+rm -f "${inner_files}/cpp/bin/"*
 rm -f "${tests}/tests/*.tst"
 rm -f "${tests}/tests/*.ans"
 rm -r "${tests}/validator/.gitkeep"
-rm -rf "${tests}/validator/*"
-rm -f "${tests}/*.txt"
+rm -rf "${tests}/validator/"*
+rm -f "${tests}/"*.txt
 rm -f "${inner_files}/validator_logs.txt"
 rm -f "${home_dir}/freemaker.txt"
 rm -f "${inner_files}/invokation/out.txt"
 rm -f "${inner_files}/invokation/err"
-rm -f "${inner_files}/invokation/tmp/*"
+rm -f "${inner_files}/invokation/tmp/"*
 rm -rf "${home_dir}/.git"
 rm -f "${home_dir}/.gitignore"
 rm -rf "${home_dir}/cont"

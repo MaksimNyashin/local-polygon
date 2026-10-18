@@ -21,7 +21,7 @@ int main(int argc, char* argv[]) {
         TTimer timer = TTimer();
         std::system(
             std::format(
-                "{} \"./{}.py\" < {} 2>> \"{}\"",
+                "{} \"./{}.py\" < {} 2> \"{}\"",
                 config.build.py_version,
                 config.solution.main,
                 in_file,
@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
         TTimer timer = TTimer();
         std::system(
             std::format(
-                "\"{}\" < {} 2>> \"{}\"",
+                "\"{}\" < {} 2> \"{}\"",
                 built_solution.string(),
                 in_file,
                 paths.sol_err.string()

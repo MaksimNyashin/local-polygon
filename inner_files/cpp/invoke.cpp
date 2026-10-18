@@ -243,7 +243,8 @@ int main() {
             paths,
             config,
             "solutions/" + std::get<0>(solutions[sol_ind]),
-            std::get<1>(solutions[sol_ind])
+            std::get<1>(solutions[sol_ind]),
+            true
         )) {
             for (std::size_t test_ind = 3; test_ind < result.size(); ++test_ind) {
                 test_result[{sol_ind, test_ind}] = {EVerdict::CE, 0};
@@ -262,6 +263,7 @@ int main() {
     }
     NBuild::write_build_errors(paths, false);
 
+    TTimer total_timer = TTimer();
     // Create testing threads
     std::vector<std::thread> threads;
     for (std::size_t thread_ind = 0; thread_ind < config.build.thread_num; ++ thread_ind) {
@@ -280,6 +282,7 @@ int main() {
     for (auto& thread : threads) {
         thread.join();
     }
+    const double total_time = total_timer.stop() * 1000;
 
     // Initialize output columns
     std::size_t st_ind = result.size();
@@ -350,6 +353,8 @@ int main() {
     // std::cout << "\n-------------------------------\n";
 
     write_columns(result);
+
+    std::cout << std::fixed << std::setprecision(3) << "Total testing time: " << total_time << "ms\n";
 
     return 0;
 }

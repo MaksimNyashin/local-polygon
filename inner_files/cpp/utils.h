@@ -71,12 +71,14 @@ struct TConfigTask {
 
 struct TConfigBuild {
     std::string cpp_options;
+    std::string cpp_run_options;
     std::string cpp_version;
     std::string py_version;
     int thread_num;
 
     TConfigBuild()
         : cpp_options(read_string("cpp_options"))
+        , cpp_run_options(read_string("cpp_run_options"))
         , cpp_version(read_string("cpp_version"))
         , py_version(read_string("py_version"))
         , thread_num(read_int("thread_num"))
@@ -244,7 +246,8 @@ inline void createFolder(const fs::path& path) {
     fs::create_directories(path);
 }
 
-bool buildFiles(const TPaths& paths, const TConfig& config, const std::string& file_path, const std::string& lang) {
+bool buildFiles(const TPaths& paths, const TConfig& config, const std::string& file_path, const std::string& lang, bool run = false) {
+    const std::string& options = (run ? config.build.cpp_run_options : config.build.cpp_options);
     if (lang == "cpp") {
         if (needsUpdate(paths, file_path)) {
             createFolder(paths.builds);
@@ -253,7 +256,7 @@ bool buildFiles(const TPaths& paths, const TConfig& config, const std::string& f
                     std::format(
                         "g++ {} {} -o \"{}\" \"{}.cpp\" 2>> \"{}\"",
                         config.build.cpp_version,
-                        config.build.cpp_options,
+                        options,
                         buildLine(paths, file_path).string(),
                         (paths.home_dir / file_path).string(),
                         (paths.build_err).string()
@@ -351,7 +354,7 @@ enum class EVerdict {
 
 EVerdict run_checker(const TPaths& paths, const std::string& test, const fs::path& checker, const fs::path& out_file, const fs::path& result_msg = "") {
     std::string msg = "";
-    if (result_msg != "") {
+    if (!result_msg.empty()) {
         msg = "2> \"" + result_msg.string() + "\"";
     }
     int checker_status = std::system(

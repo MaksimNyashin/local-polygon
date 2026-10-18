@@ -22,7 +22,7 @@ clear_all:
 	@${inner_files}/init_folder.sh
 
 c_gen:
-	@${inner_files}/run_cpp.sh run_gen
+	@(${inner_files}/run_cpp.sh run_gen $(T))
 
 c_invoke:
 	@${inner_files}/run_cpp.sh invoke
@@ -34,4 +34,4 @@ c_cont:
 	@${inner_files}/run_cpp.sh cont_builder
 
 c_test_val:
-	@${inner_files}/run_cpp.sh test_validator
+	@(${inner_files}/run_cpp.sh test_validator $(T))
