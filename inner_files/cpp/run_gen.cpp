@@ -34,15 +34,7 @@ int main(int argc, char* argv[]) {
     NBuild::createFolder(paths.tests_tests);
 
     // Generate tests
-    std::ifstream lines(paths.gen_strings);
-    std::string line;
-    while (std::getline(lines, line)) {
-        line = remove_trailing_spaces(line);
-
-        // Remove empty lines and comments
-        if (line.size() == 0 || (line[0] == '#' && line[1] == ' ')) {
-            continue;
-        }
+    for (const std::string& line : get_gen_strings(paths)){
 
         // Set group name
         if (line.substr(0, 8) == "--group=") {
@@ -86,7 +78,7 @@ int main(int argc, char* argv[]) {
         std::cout << line << std::endl;
         std::cout << "Test " << test_num << ":" << std::endl;
         TTimer gen_timer = TTimer();
-        std::system(
+        system(
             std::format(
                 "\"{}/{}\" {} > \"{}\" 2>> \"{}\"",
                 paths.builds.string(),
@@ -94,7 +86,9 @@ int main(int argc, char* argv[]) {
                 gen_args,
                 paths.gen_in.string(),
                 paths.gen_err.string()
-            ).c_str()
+            ),
+            "generator",
+            paths.gen_err
         );
         gen_timer.finish("    gen", std::cout);
         std::ofstream tests(paths.gen_tests, std::ios::app);
@@ -104,17 +98,7 @@ int main(int argc, char* argv[]) {
         // Run Validator
         tests << "----------val#" << test_num << "---------\n";
         tests.close();
-        int val_ret = std::system(
-            std::format(
-                "\"{}\" --testset tests --group {} --testOverviewLogFileName \"{}\" --testCaseFileName \"{}\" < \"{}\" 2>> \"{}\"",
-                built_validator.string(),
-                group,
-                paths.validator_logs.string(),
-                paths.gen_in.string(),
-                paths.gen_in.string(),
-                paths.gen_tests.string()
-            ).c_str()
-        );
+        int val_ret = run_validator(paths, built_validator, group, paths.gen_in, paths.gen_tests);
 
         // Check Validator return code
         tests.clear();
@@ -123,7 +107,7 @@ int main(int argc, char* argv[]) {
             tests << "----------out#" << test_num << "---------\n";
             TTimer sol_timer = TTimer();
             if (config.solution.lang == "py") {
-                std::system(
+                system(
                     std::format(
                         "{} \"{}\" < \"{}\" > \"{}\" 2>> \"{}\"",
                         config.build.py_version,
@@ -131,17 +115,21 @@ int main(int argc, char* argv[]) {
                         paths.gen_in.string(),
                         paths.gen_out.string(),
                         paths.gen_err.string()
-                    ).c_str()
+                    ),
+                    "main.py",
+                    paths.gen_err
                 );
             } else {
-                std::system(
+                system(
                     std::format(
                         "\"{}\" < \"{}\" > \"{}\" 2>> \"{}\"",
                         built_main.string(),
                         paths.gen_in.string(),
                         paths.gen_out.string(),
                         paths.gen_err.string()
-                    ).c_str()
+                    ),
+                    "main.cpp",
+                    paths.gen_err
                 );
             }
             sol_timer.finish("    time", std::cout);

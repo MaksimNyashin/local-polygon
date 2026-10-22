@@ -19,14 +19,16 @@ int main(int argc, char* argv[]) {
 
     if (config.solution.lang == "py") {
         TTimer timer = TTimer();
-        std::system(
+        system(
             std::format(
                 "{} \"./{}.py\" < {} 2> \"{}\"",
                 config.build.py_version,
                 config.solution.main,
                 in_file,
                 paths.sol_err.string()
-            ).c_str()
+            ),
+            "main.py",
+            paths.sol_err
         );
         timer.finish("Time", std::cout);
     } else if (config.solution.lang == "cpp") {
@@ -36,13 +38,15 @@ int main(int argc, char* argv[]) {
         }
         fs::path built_solution = NBuild::buildLine(paths, config.solution.main);
         TTimer timer = TTimer();
-        std::system(
+        system(
             std::format(
                 "\"{}\" < {} 2> \"{}\"",
                 built_solution.string(),
                 in_file,
                 paths.sol_err.string()
-            ).c_str()
+            ),
+            "main.cpp",
+            paths.sol_err
         );
         timer.finish("Time", std::cout);
     }

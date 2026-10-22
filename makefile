@@ -35,3 +35,6 @@ c_cont:
 
 c_test_val:
 	@(${inner_files}/run_cpp.sh test_validator $(T))
+
+c_bounds:
+	@${inner_files}/run_cpp.sh bounds

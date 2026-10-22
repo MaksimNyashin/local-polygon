@@ -1,3 +1,4 @@
+#include <cassert>
 #include <chrono>
 #include <cstdlib>
 #include <cstring>
@@ -9,12 +10,13 @@
 
 namespace fs = std::filesystem;
 
-// const std::string RED = "\033[0;31m";
-const std::string RED = "\033[0;91m";
-const std::string GREEN = "\033[0;32m";
-const std::string BLUE = "\033[0;34m";
-const std::string YELLOW = "\033[0;33m";
-const std::string NC = "\033[0m"; // No Color
+// constexpr std::string RED = "\033[0;31m";
+constexpr std::string RED = "\033[0;91m";
+constexpr std::string GREEN = "\033[0;32m";
+constexpr std::string BLUE = "\033[0;34m";
+constexpr std::string YELLOW = "\033[0;33m";
+constexpr std::string GRAY = "\033[0;90m";
+constexpr std::string NC = "\033[0m"; // No Color
 
 
 namespace NBuild {
@@ -131,77 +133,87 @@ struct TPaths {
     fs::path my_dir;
     fs::path home_dir;
     fs::path checkers;
+    fs::path cont_dir;
     fs::path inner_files;
     fs::path outer_files;
     fs::path solutions;
     fs::path test_dir;
-    fs::path cont_dir;
-    fs::path checkers_cont;
-    fs::path tests_validator_dir;
 
-    fs::path err_dir;
-    fs::path build_err;
+    fs::path checkers_cont;
+
+    fs::path cont_tests;
+
     fs::path builds;
-    fs::path gen_err;
-    fs::path gen_in;
-    fs::path gen_out;
+    fs::path err_dir;
+    fs::path gen_dir;
     fs::path inv;
     fs::path validator_logs;
+
+    fs::path bounds_err;
+    fs::path build_err;
+    fs::path check_val_err;
+    fs::path gen_err;
+
+    fs::path gen_in;
+    fs::path gen_out;
+
+    fs::path inv_tmp;
 
     fs::path gen_strings;
     fs::path inv_solutions;
 
     fs::path gen_tests;
     fs::path tests_tests;
+    fs::path tests_validator_dir;
 
-    fs::path inv_tmp;
-
+    fs::path sol_err;
     fs::path sol_in;
     fs::path sol_out;
-    fs::path sol_err;
-
-    fs::path cont_tests;
-    fs::path check_val_err;
 
     TPaths()
         : my_dir(fs::path(__FILE__).parent_path())
         , home_dir(my_dir.parent_path().parent_path().parent_path())
         , checkers(home_dir / "checkers")
+        , cont_dir(home_dir / "cont" / "to_arch")
         , inner_files(home_dir / "inner_files")
         , outer_files(home_dir / "outer_files")
         , solutions(home_dir / "solutions")
         , test_dir(home_dir / "tests")
-        , cont_dir(home_dir / "cont" / "to_arch")
-        , checkers_cont(checkers / "cont" / "contlib.h")
-        , tests_validator_dir(test_dir / "validator")
 
-        , err_dir(inner_files / "err")
-        , build_err(err_dir / "build_err.txt")
+        , checkers_cont(checkers / "cont" / "contlib.h")
+
+        , cont_tests(cont_dir / "tests")
+
         , builds(inner_files / "builds")
-        , gen_err(err_dir / "_err")
-        , gen_in(inner_files / "in.txt")
-        , gen_out(inner_files / "out.txt")
+        , err_dir(inner_files / "err")
+        , gen_dir(inner_files / "gen")
         , inv(inner_files / "invokation")
         , validator_logs(inner_files / "validator_logs.txt")
+
+        , bounds_err(err_dir / "bounds_err.txt")
+        , build_err(err_dir / "build_err.txt")
+        , check_val_err(err_dir / "validator_check.txt")
+        , gen_err(err_dir / "_err")
+
+        , gen_in(gen_dir / "in.txt")
+        , gen_out(gen_dir / "out.txt")
+
+        , inv_tmp(inv / "tmp")
 
         , gen_strings(outer_files / "gen_strings.txt")
         , inv_solutions(outer_files / "invoke_solutions.txt")
 
         , gen_tests(test_dir / "tests.txt")
         , tests_tests(test_dir / "tests")
+        , tests_validator_dir(test_dir / "validator")
 
-        , inv_tmp(inv / "tmp")
-
+        , sol_err(solutions / "err.txt")
         , sol_in(solutions / "in.txt")
         , sol_out(solutions/ "out.txt")
-        , sol_err(solutions / "err.txt")
-
-        , cont_tests(cont_dir / "tests")
-
-        , check_val_err(err_dir / "validator_check.txt")
     {
         NBuild::createFolder(tests_tests);
         NBuild::createFolder(err_dir);
+        NBuild::createFolder(gen_dir);
         clear_file(build_err);
     }
 };
@@ -275,7 +287,7 @@ bool buildFiles(const TPaths& paths, const TConfig& config, const std::string& f
     return true;
 }
 
-const size_t ERROR_DASH = 31;
+constexpr size_t ERROR_DASH = 31;
 
 inline void write_errors(const fs::path& err_file, const std::string& filename, const size_t first_line, bool ex) {
     if (!fs::is_empty(err_file)) {
@@ -304,7 +316,7 @@ inline void write_errors(const fs::path& path, const std::string& caption, bool 
 
 
 
-std::string remove_trailing_spaces(const std::string& s) {
+inline std::string remove_trailing_spaces(const std::string& s) {
     std::size_t cnt = 0;
     while (cnt < s.size() && std::isspace(s[cnt])) {
         ++cnt;
@@ -373,4 +385,47 @@ EVerdict run_checker(const TPaths& paths, const std::string& test, const fs::pat
         return EVerdict::PE;
     }
     return EVerdict::OK;
+}
+
+inline void system(const std::string& s, const std::string& prog, const fs::path& path) {
+    int ret_val = std::system(s.c_str());
+    if (ret_val != 0) {
+        std::cerr << RED << "Error: " << NC << prog << " finished with exit code " << ret_val << std::endl;
+        if (!path.empty()) {
+            NBuild::write_errors(path, "err", true);
+        } else {
+            exit(1);
+        }
+    }
+}
+
+std::vector<std::string> get_gen_strings(const TPaths& paths) {
+    std::vector<std::string> res;
+    std::ifstream lines(paths.gen_strings);
+    std::string line;
+    while (std::getline(lines, line)) {
+        line = remove_trailing_spaces(line);
+
+        // Remove empty lines and comments
+        if (line.size() == 0 || line.starts_with("# ")) {
+            continue;
+        }
+        res.push_back(line);
+    }
+    return res;
+}
+
+
+int run_validator(const TPaths& paths, const fs::path& built_validator, const std::string& group, const fs::path& val_in, const fs::path& err_file) {
+   return std::system(
+        std::format(
+            "\"{}\" --testset tests --group {} --testOverviewLogFileName \"{}\" --testCaseFileName \"{}\" < \"{}\" 2>> \"{}\"",
+            built_validator.string(),
+            group,
+            paths.validator_logs.string(),
+            val_in.string(),
+            val_in.string(),
+            err_file.string()
+        ).c_str()
+    );
 }

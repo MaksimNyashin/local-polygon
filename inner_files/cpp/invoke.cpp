@@ -10,6 +10,17 @@
 #include <vector>
 
 void write_columns(const std::vector<std::vector<std::string>>& refList) {
+    auto upd_line_size = [](const std::string& s, size_t& line_size, int mul) {
+        // all color sequences
+        int cnt = std::count(s.begin(), s.end(), '\033');
+        if (cnt) {
+            line_size += cnt * 4 * mul;
+            // all color sequence, not NC
+            int cnt_2 = std::count(s.begin(), s.end(), ';');
+            line_size += cnt_2 * 3 * mul;
+        }
+    };
+
     std::vector<std::size_t> col_wid;
     for (const auto& i : refList) {
         std::size_t sz = i.size();
@@ -18,9 +29,7 @@ void write_columns(const std::vector<std::vector<std::string>>& refList) {
         }
         for (std::size_t j = 0; j < sz; ++j) {
             std::size_t line_size = i[j].size();
-            if (i[j].find('\033') != std::string::npos) {
-                line_size -= 11;
-            }
+            upd_line_size(i[j], line_size, -1);
             col_wid[j] = std::max(col_wid[j], line_size);
         }
     }
@@ -39,9 +48,7 @@ void write_columns(const std::vector<std::vector<std::string>>& refList) {
         } else {
             for (std::size_t j = 0; j < i.size(); ++j) {
                 std::size_t wid = col_wid[j] + 1;
-                if (i[j].find('\033') != std::string::npos) {
-                    wid += 11;
-                }
+                upd_line_size(i[j], wid, 1);
                 std::cout << "| " << std::setw(wid) << i[j];
             }
             std::cout << "|\n";
@@ -77,7 +84,7 @@ void run_thread(
     fs::path err_file = paths.inv_tmp / (std::to_string(ind) + ".err");
     fs::path msg_file = paths.inv_tmp / (std::to_string(ind) + ".msg");
     double upd_tl = double(config.task.tl + 1000) / 1000;
-    double real_tl = double(config.task.tl + 1000) / 1000;
+    double real_tl = double(config.task.tl + 10) / 1000;
 
     NPaths::clear_file(err_file);
 
@@ -314,7 +321,7 @@ int main() {
                 col = RED;
             }
             ++total_tests;
-            result[test_ind].push_back(col + verdicts[std::size_t(verdict)] + NC);
+            result[test_ind].push_back(std::format("{}{} {}{:.3f}{}", col, verdicts[std::size_t(verdict)], GRAY, tl, NC));
             max_tl = std::max(max_tl, tl);
         }
         right_tests += passed_tests;
@@ -338,7 +345,7 @@ int main() {
         test_passed.push_back(std::format("{}/{}", passed_tests, total_tests));
     }
 
-
+    // Output errors
     for (int thread_ind = 0; thread_ind < config.build.thread_num; ++thread_ind) {
         fs::path err_file = paths.inv_tmp / (std::to_string(thread_ind) + ".err");
         std::cout << "\n-------------err#" << thread_ind << "-------------\n";

@@ -95,11 +95,15 @@ int main() {
     xml_res << xml;
     xml_res.close();
 
-    std::system(std::format(
-        "{} \"{}\" \"task.xml\" \"legend.html\"",
-        config.build.py_version,
-        (paths.my_dir / "cont_converter.py").string()
-    ).c_str());
+    system(
+        std::format(
+            "{} \"{}\" \"task.xml\" \"legend.html\"",
+            config.build.py_version,
+            (paths.my_dir / "cont_converter.py").string()
+        ),
+        "cont_converter.py",
+        ""
+    );
 
     return 0;
 }

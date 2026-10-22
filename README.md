@@ -63,6 +63,7 @@ Copy the whole folder and run `make clear_all`.
 - `make c_cont` — create archive for Contester.
 - `make c_test_val` — run validator tests.
 - `make c_test_val T=1` — write all validator tests to console, separated by `===`.
+- `make c_bounds` — run bounds check on generated tests according to `./outer_files/gen_string.txt`
 - `make help` — read [a more detailed explanation of this tool](inner_files/write_help.txt).
 
 <details>
@@ -73,5 +74,4 @@ TODO
 - Add ability to upload to polygon.
 - Add checker tests
 - Add ability to launch using cmd
-- Add bounds hit checking
 </details>

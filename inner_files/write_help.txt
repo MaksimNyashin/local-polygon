@@ -42,6 +42,8 @@ Make options:
     make c_test val T=1:
         Writes all validator tests to console/ separated by ===.
         Is used two add validator tests in Polygon
+    make c_bounds:
+        Runs bounds check on generated tests according to ./outer_files/gen_string.txt
     make help:
         Outputs this help message
 
