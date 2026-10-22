@@ -1,9 +1,6 @@
 #include "utils.h"
 
 int main() {
-    TConfig config = NConfig::TConfig();
-    TPaths paths = NPaths::TPaths();
-
     // Copy tests
     NBuild::createFolder(paths.cont_tests);
     for (const auto& test_filename : fs::directory_iterator(paths.tests_tests)) {
@@ -76,7 +73,7 @@ int main() {
 <Statement lang=\"ru\" src=\"legend.html\" />\n\
 <TestList inputmask=\"tests/test_*_input.txt\" patternmask=\"tests/test_*_pattern.txt\" />\n\
 <Judge><Checker src=\"checker.cpp\" /></Judge>\n\
-<Attempt><Solver src=\"main.cpp\" /></Attempt>\n\
+<Attempt><Solver src=\"main.{}\" /></Attempt>\n\
 </Problem>\n\
 ",
         config.task.task_name,
@@ -89,7 +86,8 @@ int main() {
         config.task.ml * 1000,
         config.task.ml * 1000,
         config.task.ml * 1000,
-        config.task.ml * 1000
+        config.task.ml * 1000,
+        config.solution.lang
     );
     std::ofstream xml_res(paths.cont_dir / "task.xml", std::ios::out);
     xml_res << xml;

@@ -6,20 +6,13 @@ enum class EValidatorVerdict {
     FL
 };
 
-const std::string verdict_to_str[2]{"OK", "Fail"};
+constexpr std::string verdict_to_str[2]{"OK", "Fail"};
 
 int main(int argc, char* argv[]) {
-    const TConfig config = NConfig::TConfig();
-    const TPaths paths = NPaths::TPaths();
-
     bool write_all = (argc == 2);
 
     // Compile validator
-    fs::path built_validator = NBuild::buildLine(paths, "validator");
-    if (!NBuild::buildFiles(paths, config, "validator", "cpp")) {
-        std::cout << RED << "Failed to compile validator.cpp" << NC << std::endl;
-        NBuild::write_build_errors(paths);
-    }
+    const fs::path built_validator = NBuild::build_validator();
 
     std::vector<EValidatorVerdict> verdicts;
     // Iterate over tests

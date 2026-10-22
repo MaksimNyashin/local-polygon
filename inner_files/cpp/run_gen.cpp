@@ -2,26 +2,16 @@
 #include <set>
 
 int main(int argc, char* argv[]) {
-    TConfig config = NConfig::TConfig();
-    TPaths paths = NPaths::TPaths();
     NPaths::clear_file(paths.gen_err);
     NPaths::clear_file(paths.gen_tests);
 
     const int tst = (argc == 2 ? std::stoi(argv[1]) : -1);
 
     // Compile Main Correct Solution
-    fs::path built_main = NBuild::buildLine(paths, config.solution.main);
-    if (!NBuild::buildFiles(paths, config, config.solution.main, config.solution.lang, true)) {
-        std::cout << RED << "Failed to compile " << config.solution.main << ".cpp" << NC << std::endl;
-        NBuild::write_build_errors(paths);
-    }
+    const std::string built_main = NBuild::build_main(true);
 
     // Compile Validator
-    fs::path built_validator = NBuild::buildLine(paths, "validator");
-    if (!NBuild::buildFiles(paths, config, "validator", "cpp")) {
-        std::cout << RED << "Failed to compile validator.cpp" << NC << std::endl;
-        NBuild::write_build_errors(paths);
-    }
+    const fs::path built_validator = NBuild::build_validator();
 
     int test_num = config.task.first_test_num;
     int total_num = 0;
@@ -34,7 +24,7 @@ int main(int argc, char* argv[]) {
     NBuild::createFolder(paths.tests_tests);
 
     // Generate tests
-    for (const std::string& line : get_gen_strings(paths)){
+    for (const std::string& line : get_gen_strings()){
 
         // Set group name
         if (line.substr(0, 8) == "--group=") {
@@ -63,7 +53,7 @@ int main(int argc, char* argv[]) {
             continue;
         }
         if (!compiled_generators.count(gen_name)) {
-            if (!NBuild::buildFiles(paths, config, gen_name, "cpp")) {
+            if (!NBuild::buildFiles(gen_name, "cpp")) {
                 std::cout << RED << "Failed to compile " << gen_name << ".cpp" << NC << std::endl;
                 failed_generators.insert(gen_name);
                 ++test_num;
@@ -98,7 +88,7 @@ int main(int argc, char* argv[]) {
         // Run Validator
         tests << "----------val#" << test_num << "---------\n";
         tests.close();
-        int val_ret = run_validator(paths, built_validator, group, paths.gen_in, paths.gen_tests);
+        int val_ret = run_validator(built_validator, group, paths.gen_in, paths.gen_tests);
 
         // Check Validator return code
         tests.clear();
@@ -106,32 +96,17 @@ int main(int argc, char* argv[]) {
         if (!val_ret) {
             tests << "----------out#" << test_num << "---------\n";
             TTimer sol_timer = TTimer();
-            if (config.solution.lang == "py") {
-                system(
-                    std::format(
-                        "{} \"{}\" < \"{}\" > \"{}\" 2>> \"{}\"",
-                        config.build.py_version,
-                        (paths.home_dir / (config.solution.main + ".py")).string(),
-                        paths.gen_in.string(),
-                        paths.gen_out.string(),
-                        paths.gen_err.string()
-                    ),
-                    "main.py",
-                    paths.gen_err
-                );
-            } else {
-                system(
-                    std::format(
-                        "\"{}\" < \"{}\" > \"{}\" 2>> \"{}\"",
-                        built_main.string(),
-                        paths.gen_in.string(),
-                        paths.gen_out.string(),
-                        paths.gen_err.string()
-                    ),
-                    "main.cpp",
-                    paths.gen_err
-                );
-            }
+            system(
+                std::format(
+                    "{} < \"{}\" > \"{}\" 2>> \"{}\"",
+                    built_main,
+                    paths.gen_in.string(),
+                    paths.gen_out.string(),
+                    paths.gen_err.string()
+                ),
+                "main." + config.solution.lang,
+                paths.gen_err
+            );
             sol_timer.finish("    time", std::cout);
             cat_file(paths.gen_out, tests);
 
@@ -153,7 +128,7 @@ int main(int argc, char* argv[]) {
     std::cout << "\n________Validator results________\n";
     std::cout << (suc_num < total_num ? RED : GREEN) << "Successfully generated/validated  " << suc_num << "/" << total_num << "  tests\n\n" << NC;
 
-    NBuild::write_gen_errors(paths, false);
+    NBuild::write_gen_errors(false);
 
     return 0;
 }

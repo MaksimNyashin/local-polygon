@@ -10,13 +10,13 @@
 
 namespace fs = std::filesystem;
 
-// constexpr std::string RED = "\033[0;31m";
-constexpr std::string RED = "\033[0;91m";
-constexpr std::string GREEN = "\033[0;32m";
-constexpr std::string BLUE = "\033[0;34m";
-constexpr std::string YELLOW = "\033[0;33m";
-constexpr std::string GRAY = "\033[0;90m";
-constexpr std::string NC = "\033[0m"; // No Color
+// inline constexpr std::string RED = "\033[0;31m";
+inline constexpr std::string RED = "\033[0;91m";
+inline constexpr std::string GREEN = "\033[0;32m";
+inline constexpr std::string BLUE = "\033[0;34m";
+inline constexpr std::string YELLOW = "\033[0;33m";
+inline constexpr std::string GRAY = "\033[0;90m";
+inline constexpr std::string NC = "\033[0m"; // No Color
 
 
 namespace NBuild {
@@ -106,7 +106,7 @@ struct TConfig {
 
 } // NConfig
 
-using TConfig = NConfig::TConfig;
+inline const NConfig::TConfig config;
 
 
 
@@ -220,13 +220,13 @@ struct TPaths {
 
 } // NPaths
 
-using TPaths = NPaths::TPaths;
+inline const NPaths::TPaths paths;
 
 
 
 namespace NBuild {
 
-fs::path buildLine(const TPaths& paths, std::string name) {
+fs::path buildLine(std::string name) {
     for (char& c : name) {
         if (c == '/' || c == '\\') {
             c = '_';
@@ -250,18 +250,18 @@ fs::file_time_type builtTime(const fs::path& path) {
     return res;
 }
 
-inline bool needsUpdate(const TPaths& paths, const std::string& name) {
-    return builtTime(buildLine(paths, name)) < builtTime(paths.home_dir / (name + ".cpp"));
+inline bool needsUpdate(const std::string& name) {
+    return builtTime(buildLine(name)) < builtTime(paths.home_dir / (name + ".cpp"));
 }
 
 inline void createFolder(const fs::path& path) {
     fs::create_directories(path);
 }
 
-bool buildFiles(const TPaths& paths, const TConfig& config, const std::string& file_path, const std::string& lang, bool run = false) {
+bool buildFiles(const std::string& file_path, const std::string& lang, bool run = false) {
     const std::string& options = (run ? config.build.cpp_run_options : config.build.cpp_options);
     if (lang == "cpp") {
-        if (needsUpdate(paths, file_path)) {
+        if (needsUpdate(file_path)) {
             createFolder(paths.builds);
             if (
                 std::system(
@@ -269,7 +269,7 @@ bool buildFiles(const TPaths& paths, const TConfig& config, const std::string& f
                         "g++ {} {} -o \"{}\" \"{}.cpp\" 2>> \"{}\"",
                         config.build.cpp_version,
                         options,
-                        buildLine(paths, file_path).string(),
+                        buildLine(file_path).string(),
                         (paths.home_dir / file_path).string(),
                         (paths.build_err).string()
                     ).c_str()
@@ -287,7 +287,7 @@ bool buildFiles(const TPaths& paths, const TConfig& config, const std::string& f
     return true;
 }
 
-constexpr size_t ERROR_DASH = 31;
+inline constexpr size_t ERROR_DASH = 31;
 
 inline void write_errors(const fs::path& err_file, const std::string& filename, const size_t first_line, bool ex) {
     if (!fs::is_empty(err_file)) {
@@ -300,16 +300,50 @@ inline void write_errors(const fs::path& err_file, const std::string& filename, 
     }
 }
 
-inline void write_build_errors(const TPaths& paths, bool ex = true) {
+inline void write_build_errors(bool ex = true) {
     write_errors(paths.build_err, "build_err", 11, ex);
 }
 
-inline void write_gen_errors(const TPaths& paths, bool ex = true) {
+inline void write_gen_errors(bool ex = true) {
     write_errors(paths.gen_err, "gen_err", 12, ex);
 }
 
 inline void write_errors(const fs::path& path, const std::string& caption, bool ex = true) {
     write_errors(path, caption, (ERROR_DASH + 1 - caption.size()) / 2, ex);
+}
+
+inline fs::path build_binary(const std::string& filename, bool run = false) {
+    fs::path built_binary = NBuild::buildLine(filename);
+    if (!NBuild::buildFiles(filename, "cpp", run)) {
+        std::cout << RED << "Failed to compile " << filename << ".cpp" << NC << std::endl;
+        NBuild::write_build_errors();
+    }
+    return built_binary;
+}
+
+inline fs::path build_validator() {
+    return build_binary("validator");
+}
+
+inline fs::path build_checker() {
+    const std::string checker = "checkers/" + config.task.checker;
+    return build_binary(checker);
+}
+
+inline std::string build_solution(const std::string& solution, const std::string& lang, bool run) {
+    if (lang == "cpp") {
+        return "\"" + build_binary(solution, run).string() + "\"";
+    } else {
+        return std::format(
+            "{} \"{}.py\"",
+            config.build.py_version,
+            (paths.home_dir / solution).string()
+        );
+    }
+}
+
+inline std::string build_main(bool run) {
+    return build_solution(config.solution.main, config.solution.lang, run);
 }
 
 } // NBuild
@@ -364,7 +398,7 @@ enum class EVerdict {
     CE
 };
 
-EVerdict run_checker(const TPaths& paths, const std::string& test, const fs::path& checker, const fs::path& out_file, const fs::path& result_msg = "") {
+EVerdict run_checker(const std::string& test, const fs::path& checker, const fs::path& out_file, const fs::path& result_msg = "") {
     std::string msg = "";
     if (!result_msg.empty()) {
         msg = "2> \"" + result_msg.string() + "\"";
@@ -399,7 +433,7 @@ inline void system(const std::string& s, const std::string& prog, const fs::path
     }
 }
 
-std::vector<std::string> get_gen_strings(const TPaths& paths) {
+std::vector<std::string> get_gen_strings() {
     std::vector<std::string> res;
     std::ifstream lines(paths.gen_strings);
     std::string line;
@@ -416,7 +450,7 @@ std::vector<std::string> get_gen_strings(const TPaths& paths) {
 }
 
 
-int run_validator(const TPaths& paths, const fs::path& built_validator, const std::string& group, const fs::path& val_in, const fs::path& err_file) {
+int run_validator(const fs::path& built_validator, const std::string& group, const fs::path& val_in, const fs::path& err_file) {
    return std::system(
         std::format(
             "\"{}\" --testset tests --group {} --testOverviewLogFileName \"{}\" --testCaseFileName \"{}\" < \"{}\" 2>> \"{}\"",

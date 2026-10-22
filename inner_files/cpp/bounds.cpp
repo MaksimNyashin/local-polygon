@@ -170,7 +170,7 @@ public:
         }
     }
 
-    void read_bounds(const TPaths& paths) {
+    void read_bounds() {
         std::ifstream logs(paths.validator_logs);
         std::vector<TStringReader> hits;
         std::vector<TStringReader> constant_bounds;
@@ -226,29 +226,22 @@ public:
 };
 
 int main() {
-    TConfig config = NConfig::TConfig();
-    TPaths paths = NPaths::TPaths();
-
     TBounds bounds;
 
-    fs::path built_validator = NBuild::buildLine(paths, "validator");
-    if (!NBuild::buildFiles(paths, config, "validator", "cpp")) {
-        std::cout << RED << "Failed to compile validator.cpp" << NC << std::endl;
-        NBuild::write_build_errors(paths);
-    }
+    const fs::path built_validator = NBuild::build_validator();
 
     NPaths::clear_file(paths.bounds_err);
 
     int tst_num = config.task.first_test_num;
     std::string group = "";
-    for (const std::string& line : get_gen_strings(paths)) {
+    for (const std::string& line : get_gen_strings()) {
         if (line.starts_with("--group=")) {
             group = line.substr(8);
             continue;
         }
         fs::path val_in = paths.tests_tests / std::format("{:0>2}.tst", tst_num);
-        int val_ret = run_validator(paths, built_validator, group, val_in, paths.bounds_err);
-        bounds.read_bounds(paths);
+        int val_ret = run_validator(built_validator, group, val_in, paths.bounds_err);
+        bounds.read_bounds();
         ++tst_num;
         if (!val_ret) {
             NBuild::write_errors(paths.bounds_err, "bounds_err", true);

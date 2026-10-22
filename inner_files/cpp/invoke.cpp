@@ -65,7 +65,7 @@ struct TRunTest{
     int test_ind;
 };
 
-const std::string verdicts[7] = {"OK", "WA", "PE", "TL", "ML", "RE", "CE"};
+constexpr std::string verdicts[7] = {"OK", "WA", "PE", "TL", "ML", "RE", "CE"};
 
 using TTestResult = std::map<std::pair<int ,int>, std::pair<EVerdict, double>>;
 std::mutex tests_mutex;
@@ -73,8 +73,6 @@ std::mutex write_mutex;
 
 void run_thread(
     const int ind,
-    const TConfig& config,
-    const TPaths& paths,
     const fs::path& checker,
     std::queue<TRunTest>& tests_queue,
     TTestResult& test_results
@@ -102,32 +100,18 @@ void run_thread(
         // Run solution on the test
         TTimer timer = TTimer();
         int status;
-        if (test.ext == "cpp") {
-            status = std::system(
-                std::format(
-                    "ulimit -v {}; timeout {}s \"{}\" < \"{}\" 1> \"{}\" 2>> \"{}\"",
-                    config.task.ml * 1024,
-                    upd_tl,
-                    NBuild::buildLine(paths, "solutions/" + test.filename).string(),
-                    (paths.tests_tests / (test.test + ".tst")).string(),
-                    out_file.string(),
-                    err_file.string()
-                ).c_str()
-            );
-        } else if (test.ext == "py") {
-            status = std::system(
-                std::format(
-                    "ulimit -v {}; timeout {}s {} \"{}.py\" < \"{}\" 1> \"{}\" 2>> \"{}\"",
-                    config.task.ml * 1024,
-                    upd_tl,
-                    config.build.py_version,
-                    (paths.solutions / test.filename).string(),
-                    (paths.tests_tests / (test.test + ".tst")).string(),
-                    out_file.string(),
-                    err_file.string()
-                ).c_str()
-            );
-        }
+        const std::string built_solution = NBuild::build_solution("solutions/" + test.filename, test.ext, true);
+        status = std::system(
+            std::format(
+                "ulimit -v {}; timeout {:.3f}s {} < \"{}\" 1> \"{}\" 2>> \"{}\"",
+                config.task.ml * 1024,
+                upd_tl,
+                built_solution,
+                (paths.tests_tests / (test.test + ".tst")).string(),
+                out_file.string(),
+                err_file.string()
+            ).c_str()
+        );
         double tl = timer.stop();
 
         // Set verdicts
@@ -141,7 +125,7 @@ void run_thread(
         } else if (status != 0) {
             verdict = EVerdict::RE;
         } else {  // Run Checker for OK, WA or PE
-            verdict = run_checker(paths, test.test, checker, out_file, msg_file);
+            verdict = run_checker(test.test, checker, out_file, msg_file);
             std::stringstream ss;
             ss << test.filename << "." << test.ext << "::" << test.test << ":\t";
             std::ifstream fi(msg_file);
@@ -179,9 +163,6 @@ void run_thread(
 
 
 int main() {
-    const TConfig config = NConfig::TConfig();
-    const TPaths paths = NPaths::TPaths();
-
     NBuild::createFolder(paths.inv_tmp);
 
     std::vector<std::vector<std::string>> result(3);
@@ -202,12 +183,7 @@ int main() {
     }
 
     // Compile Checker
-    std::string checker = "checkers/" + config.task.checker;
-    fs::path built_checker = NBuild::buildLine(paths, checker);
-    if (!NBuild::buildFiles(paths, config, checker, "cpp")) {
-        std::cout << RED << "Failed to compile " << checker <<".cpp" << NC << std::endl;
-        NBuild::write_build_errors(paths);
-    }
+    const fs::path built_checker = NBuild::build_checker();
 
     std::map<std::string, EVerdict> verdicts_map;
     for (int i = 0; i < 7; ++i) {
@@ -247,8 +223,6 @@ int main() {
     std::queue<TRunTest> tests_queue;
     for (std::size_t sol_ind = 0; sol_ind < solutions.size(); ++ sol_ind) {
         if (!NBuild::buildFiles(
-            paths,
-            config,
             "solutions/" + std::get<0>(solutions[sol_ind]),
             std::get<1>(solutions[sol_ind]),
             true
@@ -268,7 +242,7 @@ int main() {
             }
         }
     }
-    NBuild::write_build_errors(paths, false);
+    NBuild::write_build_errors(false);
 
     TTimer total_timer = TTimer();
     // Create testing threads
@@ -277,8 +251,6 @@ int main() {
         threads.emplace_back(
             run_thread,
             thread_ind,
-            std::cref(config),
-            std::cref(paths),
             std::cref(built_checker),
             std::ref(tests_queue),
             std::ref(test_result)
